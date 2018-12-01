@@ -1,4 +1,4 @@
-use piece::{PieceGrid, PieceKind};
+use piece::properties::{PieceGrid, PieceKind};
 use std::collections::HashMap;
 
 pub type RotationSystem = HashMap<PieceKind, RotationTable>;
