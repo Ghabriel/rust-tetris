@@ -155,6 +155,26 @@ mod tests {
         assert_grid_eq(&piece, &rotation_system, "000/110/011");
     }
 
+    #[test]
+    fn nintendo_rotation_t_different_initial_state() {
+        let rotation_system = rotations::build_nintendo_rotation_system();
+
+        let mut piece = new_piece(PieceKind::T, 1);
+        assert_grid_eq(&piece, &rotation_system, "010/110/010");
+
+        piece.rotate(&rotation_system);
+        assert_grid_eq(&piece, &rotation_system, "010/111/000");
+
+        piece.rotate(&rotation_system);
+        assert_grid_eq(&piece, &rotation_system, "010/011/010");
+
+        piece.rotate(&rotation_system);
+        assert_grid_eq(&piece, &rotation_system, "000/111/010");
+
+        piece.rotate(&rotation_system);
+        assert_grid_eq(&piece, &rotation_system, "010/110/010");
+    }
+
     fn new_piece(kind: PieceKind, rotation_index: usize) -> Piece {
         Piece::new(kind, Color::Blue, rotation_index)
     }
