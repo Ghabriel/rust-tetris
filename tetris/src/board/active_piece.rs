@@ -17,6 +17,22 @@ impl ActivePiece {
         }
     }
 
+    pub fn shift(&mut self, offset: isize) {
+        let unsigned_offset = if offset >= 0 {
+            offset as usize
+        } else {
+            -offset as usize
+        };
+
+        if offset >= 0 {
+            self.position += unsigned_offset;
+        } else if unsigned_offset <= self.position {
+            self.position -= unsigned_offset;
+        } else {
+            self.position = 0;
+        }
+    }
+
     pub fn is_touching_board(&self, board: &Board, settings: &Settings) -> bool {
         let normalized_position = self.get_normalized_position(board);
         let parsed_grid = self.get_parsed_grid(&settings.rotation_system);

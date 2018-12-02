@@ -45,7 +45,7 @@ impl Board {
         }
 
         if !self.active_piece_touches_board(settings) {
-            self.lower_active_piece(settings);
+            self.lower_active_piece();
             return;
         }
 
@@ -63,10 +63,10 @@ impl Board {
         active_piece.is_touching_board(self, settings)
     }
 
-    fn at(&self, row: usize, column: usize) -> &Option<Block> {
-        let index = row * self.num_columns + column;
-
-        &self.grid[index]
+    fn lower_active_piece(&mut self) {
+        if let Some(ref mut active_piece) = self.active_piece {
+            active_piece.shift(self.num_columns as isize);
+        }
     }
 
     fn materialize_active_piece(&mut self, _settings: &Settings) {
@@ -77,7 +77,9 @@ impl Board {
         // TODO
     }
 
-    fn lower_active_piece(&mut self, _settings: &Settings) {
-        // TODO
+    fn at(&self, row: usize, column: usize) -> &Option<Block> {
+        let index = row * self.num_columns + column;
+
+        &self.grid[index]
     }
 }
