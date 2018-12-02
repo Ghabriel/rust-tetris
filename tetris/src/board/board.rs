@@ -1,5 +1,5 @@
 use board::active_piece::ActivePiece;
-use board::{Block, Position};
+use board::Block;
 use piece::Piece;
 use settings::Settings;
 
@@ -35,10 +35,8 @@ impl Board {
         self.active_piece = Some(active_piece);
     }
 
-    pub fn cell_touches_board(&self, cell_position: Position) -> bool {
-        let Position(cell_row, cell_column) = cell_position;
-
-        self.is_occupied(cell_row + 1, cell_column)
+    pub fn is_occupied(&self, row: usize, column: usize) -> bool {
+        self.at(row, column).is_some()
     }
 
     pub fn tick(&mut self, settings: &Settings) {
@@ -63,10 +61,6 @@ impl Board {
         let active_piece = self.active_piece.as_ref().unwrap();
 
         active_piece.is_touching_board(self, settings)
-    }
-
-    fn is_occupied(&self, row: usize, column: usize) -> bool {
-        self.at(row, column).is_some()
     }
 
     fn at(&self, row: usize, column: usize) -> &Option<Block> {

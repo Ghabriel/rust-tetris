@@ -20,8 +20,6 @@ impl<'a> ParsedGrid<'a> {
     }
 
     pub fn is_touching_board(&self, board: &Board, normalized_position: Position) -> bool {
-        let Position(base_line, base_column) = normalized_position;
-
         for (reverse_index, cell) in self.grid.0.iter().rev().enumerate() {
             if !cell {
                 continue;
@@ -29,24 +27,32 @@ impl<'a> ParsedGrid<'a> {
 
             let index = self.size - 1 - reverse_index;
 
-            let cell_grid_line = index / self.num_columns;
-            let cell_grid_column = index % self.num_columns;
-
-            let cell_line = base_line + cell_grid_line;
-            let cell_column = base_column + cell_grid_column;
-            let cell_position = Position(cell_line, cell_column);
-
-            let line_below_is_occupied = self.is_occupied(
-                cell_grid_line + 1,
-                cell_grid_column
-            );
-
-            if !line_below_is_occupied && board.cell_touches_board(cell_position) {
+            if self.is_cell_touching_board(index, board, &normalized_position) {
                 return true;
             }
         }
 
         false
+    }
+
+    fn is_cell_touching_board(
+        &self,
+        cell_index: usize,
+        board: &Board,
+        normalized_position: &Position
+    ) -> bool {
+        let Position(base_line, base_column) = normalized_position;
+
+        let cell_grid_line = cell_index / self.num_columns;
+        let cell_grid_column = cell_index % self.num_columns;
+
+        let cell_board_line = base_line + cell_grid_line;
+        let cell_board_column = base_column + cell_grid_column;
+
+        let grid_below_is_occupied = self.is_occupied(cell_grid_line + 1, cell_grid_column);
+        let board_below_is_occupied = board.is_occupied(cell_board_line + 1, cell_board_column);
+
+        !grid_below_is_occupied && board_below_is_occupied
     }
 
     fn is_occupied(&self, row: usize, column: usize) -> bool {
