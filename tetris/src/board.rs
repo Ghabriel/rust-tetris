@@ -64,37 +64,36 @@ impl Board {
     }
 
     fn active_piece_touches_board(&self, settings: &Settings) -> bool {
-        if let Some(ref active_piece) = self.active_piece {
-            let Position(base_line, base_column) = self.get_active_piece_position();
+        let active_piece = self.active_piece.as_ref().unwrap();
+        let Position(base_line, base_column) = self.get_active_piece_position();
 
-            let piece = &active_piece.piece;
-            let piece_grid = piece.get_grid(&settings.rotation_system);
-            let piece_grid_size = piece_grid.0.len();
-            let piece_grid_columns = (piece_grid_size as f64).sqrt() as usize;
+        let piece = &active_piece.piece;
+        let piece_grid = piece.get_grid(&settings.rotation_system);
+        let piece_grid_size = piece_grid.0.len();
+        let piece_grid_columns = (piece_grid_size as f64).sqrt() as usize;
 
-            for (reverse_index, cell) in piece_grid.0.iter().rev().enumerate() {
-                if !cell {
-                    continue;
-                }
+        for (reverse_index, cell) in piece_grid.0.iter().rev().enumerate() {
+            if !cell {
+                continue;
+            }
 
-                let index = piece_grid_size - 1 - reverse_index;
+            let index = piece_grid_size - 1 - reverse_index;
 
-                let cell_grid_line = index / piece_grid_columns;
-                let cell_grid_column = index % piece_grid_columns;
+            let cell_grid_line = index / piece_grid_columns;
+            let cell_grid_column = index % piece_grid_columns;
 
-                let cell_line = base_line + cell_grid_line;
-                let cell_column = base_column + cell_grid_column;
-                let cell_position = Position(cell_line, cell_column);
+            let cell_line = base_line + cell_grid_line;
+            let cell_column = base_column + cell_grid_column;
+            let cell_position = Position(cell_line, cell_column);
 
-                let line_below = self.grid_index(
-                    cell_grid_line + 1,
-                    cell_grid_column,
-                    piece_grid_columns,
-                );
+            let line_below = self.grid_index(
+                cell_grid_line + 1,
+                cell_grid_column,
+                piece_grid_columns,
+            );
 
-                if !piece_grid.0[line_below] && self.cell_touches_board(cell_position) {
-                    return true;
-                }
+            if !piece_grid.0[line_below] && self.cell_touches_board(cell_position) {
+                return true;
             }
         }
 
