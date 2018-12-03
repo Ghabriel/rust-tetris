@@ -1,5 +1,5 @@
 use board::{Board, Position};
-use board::parsed_grid::ParsedGrid;
+use board::parsed_grid::{NormalizedCellIterator, ParsedGrid};
 use piece::Piece;
 use rotations::RotationSystem;
 use settings::Settings;
@@ -51,5 +51,16 @@ impl ActivePiece {
         let piece_grid = self.piece.get_grid(rotation_system);
 
         ParsedGrid::new(piece_grid)
+    }
+
+    pub fn normalized_cell_iter<'a>(
+        &'a self,
+        board: &'a Board,
+        settings: &'a Settings
+    ) -> NormalizedCellIterator<'a> {
+        let normalized_position = self.get_normalized_position(board);
+        let parsed_grid = self.get_parsed_grid(&settings.rotation_system);
+
+        parsed_grid.normalized_cell_iter(board, normalized_position)
     }
 }
