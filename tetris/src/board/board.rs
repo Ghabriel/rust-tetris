@@ -1,5 +1,6 @@
 use board::active_piece::ActivePiece;
 use board::Block;
+use board::iteration::NormalizedCell;
 use piece::Piece;
 use settings::Settings;
 
@@ -84,9 +85,22 @@ impl Board {
     }
 
     fn materialize_active_piece(&mut self, settings: &Settings) {
-        // if let Some(ref mut active_piece) = self.active_piece {
-        //     active_piece.normalized_cell_iter()
-        // }
+        let active_piece = self.active_piece.as_ref().unwrap();
+        let normalized_cells: Vec<NormalizedCell> = active_piece
+            .normalized_cell_iter(self, settings)
+            .collect();
+
+        for cell in normalized_cells {
+            let index = cell.board_line * self.num_columns + cell.board_column;
+            let board_cell = &mut self.grid[index];
+
+            match board_cell {
+                Some(_) => panic!("Cell clash during materialization"),
+                None => {
+                    *board_cell = Some(Block { });
+                },
+            }
+        }
     }
 
     fn check_line_clears(&mut self, _settings: &Settings) {
