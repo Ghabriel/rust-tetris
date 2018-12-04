@@ -59,24 +59,22 @@ impl Board {
 
     fn active_piece_touches_board(&self, settings: &Settings) -> bool {
         let active_piece = self.active_piece.as_ref().unwrap();
-        // let parsed_grid = active_piece.get_parsed_grid(&settings.rotation_system);
+        let parsed_grid = active_piece.get_parsed_grid(&settings.rotation_system);
 
-        active_piece.normalized_cell_iter(self, settings);
-        active_piece.is_touching_board(self, settings)
+        active_piece.normalized_cell_iter_rev(self, settings)
+            .any(|cell| {
+                let grid_below_is_occupied = parsed_grid.is_occupied(
+                    cell.grid_line + 1,
+                    cell.grid_column
+                );
 
-        //     .map(|cell| {
-        //         let grid_below_is_occupied = parsed_grid.is_occupied(
-        //             cell.grid_line + 1,
-        //             cell.grid_column
-        //         );
+                let board_below_is_occupied = self.is_occupied(
+                    cell.board_line + 1,
+                    cell.board_column
+                );
 
-        //         let board_below_is_occupied = self.is_occupied(
-        //             cell.board_line + 1,
-        //             cell.board_column
-        //         );
-
-        //         !grid_below_is_occupied && board_below_is_occupied
-        //     })
+                !grid_below_is_occupied && board_below_is_occupied
+            })
     }
 
     fn lower_active_piece(&mut self) {
