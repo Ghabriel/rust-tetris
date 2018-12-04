@@ -1,5 +1,4 @@
 use board::{Board, Position};
-use board::parsed_grid::ParsedGrid;
 use piece::{Piece, PieceGrid};
 use rotations::RotationSystem;
 use settings::Settings;
@@ -33,13 +32,6 @@ impl ActivePiece {
         }
     }
 
-    pub fn is_touching_board(&self, board: &Board, settings: &Settings) -> bool {
-        let normalized_position = self.get_normalized_position(board);
-        let parsed_grid = self.get_parsed_grid(&settings.rotation_system);
-
-        parsed_grid.is_touching_board(board, normalized_position)
-    }
-
     fn get_normalized_position(&self, board: &Board) -> Position {
         let line = self.position / board.get_num_columns();
         let column = self.position % board.get_num_columns();
@@ -47,10 +39,17 @@ impl ActivePiece {
         Position(line, column)
     }
 
-    pub fn get_parsed_grid<'a>(&self, rotation_system: &'a RotationSystem) -> ParsedGrid<'a> {
+    pub fn is_grid_cell_occupied(
+        &self,
+        row: usize,
+        column: usize,
+        rotation_system: &RotationSystem
+    ) -> bool {
         let piece_grid = self.piece.get_grid(rotation_system);
+        let grid_num_columns = (piece_grid.0.len() as f64).sqrt() as usize;
+        let index = row * grid_num_columns + column;
 
-        ParsedGrid::new(piece_grid)
+        piece_grid.0[index]
     }
 
     pub fn normalized_cell_iter<'a>(
@@ -65,7 +64,6 @@ impl ActivePiece {
 
         NormalizedCellIterator::new(
             NormalizedCellIterationData::new(
-                board,
                 normalized_position,
                 piece_grid,
                 num_columns
@@ -85,7 +83,6 @@ impl ActivePiece {
 
         NormalizedCellReverseIterator::new(
             NormalizedCellIterationData::new(
-                board,
                 normalized_position,
                 piece_grid,
                 num_columns
@@ -103,7 +100,6 @@ pub struct NormalizedCell {
 }
 
 struct NormalizedCellIterationData<'a> {
-    board: &'a Board,
     normalized_position: Position,
     grid: &'a PieceGrid,
     num_columns: usize,
@@ -111,13 +107,11 @@ struct NormalizedCellIterationData<'a> {
 
 impl<'a> NormalizedCellIterationData<'a> {
     fn new(
-        board: &'a Board,
         normalized_position: Position,
         grid: &'a PieceGrid,
         num_columns: usize,
     ) -> NormalizedCellIterationData<'a> {
         NormalizedCellIterationData {
-            board,
             normalized_position,
             grid,
             num_columns,
