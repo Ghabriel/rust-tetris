@@ -30,6 +30,14 @@ impl Board {
         self.num_columns
     }
 
+    pub fn debug(&mut self) {
+        self.grid[20] = Some(Block { });
+        self.grid[21] = Some(Block { });
+        self.grid[22] = Some(Block { });
+        self.grid[23] = Some(Block { });
+        self.grid[24] = Some(Block { });
+    }
+
     pub fn spawn_piece(&mut self, piece: Piece, position: usize) {
         let active_piece = ActivePiece::new(piece, position);
 
@@ -96,20 +104,66 @@ impl Board {
 
             match board_cell {
                 Some(_) => panic!("Cell clash during materialization"),
-                None => {
-                    *board_cell = Some(Block { });
-                },
+                None => *board_cell = Some(Block { }),
             }
         }
     }
 
-    fn check_line_clears(&mut self, _settings: &Settings) {
-        // TODO
+    pub fn check_line_clears(&mut self, _settings: &Settings) {
+        let num_cleared_lines = self.rows()
+            .enumerate()
+            .filter(|(_, row)| {
+                row.iter().all(|cell| cell.is_some())
+            })
+            .map(|(index, _)| index)
+            .inspect(|index| println!("Row {} should be cleared", index))
+            .count();
+
+        println!("# cleared rows: {}", num_cleared_lines);
     }
 
     fn at(&self, row: usize, column: usize) -> &Option<Block> {
         let index = row * self.num_columns + column;
 
         &self.grid[index]
+    }
+
+    fn rows<'a>(&'a self) -> BoardRowIterator<'a> {
+        BoardRowIterator::new(self)
+    }
+}
+
+struct BoardRowIterator<'a> {
+    board: &'a Board,
+    next_row: usize,
+}
+
+impl<'a> BoardRowIterator<'a> {
+    fn new(board: &'a Board) -> BoardRowIterator<'a> {
+        BoardRowIterator {
+            board,
+            next_row: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for BoardRowIterator<'a> {
+    type Item = Vec<&'a Option<Block>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let grid = &self.board.grid;
+        let num_columns = self.board.num_columns;
+        let next_starting_index = self.next_row * num_columns;
+
+        if next_starting_index >= grid.len() {
+            return None;
+        }
+
+        self.next_row += 1;
+
+        Some(grid.iter()
+            .skip(next_starting_index)
+            .take(num_columns)
+            .collect())
     }
 }
