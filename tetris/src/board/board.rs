@@ -1,7 +1,7 @@
 use board::active_piece::ActivePiece;
 use board::Block;
 use board::iteration::NormalizedCell;
-use piece::Piece;
+use piece::{Color, Piece};
 use settings::Settings;
 
 pub struct Board {
@@ -10,6 +10,9 @@ pub struct Board {
     active_piece: Option<ActivePiece>,
 }
 
+/**
+ * Board constructors
+ */
 impl Board {
     pub fn new(num_rows: usize, num_columns: usize) -> Board {
         let grid_size = num_rows * num_columns;
@@ -26,18 +29,41 @@ impl Board {
         }
     }
 
+    pub fn from_array(rows: &[&str]) -> Board {
+        let grid_size = rows.len();
+        let num_columns = (grid_size as f64).sqrt() as usize;
+        let mut grid = Vec::with_capacity(grid_size);
+
+        for row in rows {
+            for column in row.chars() {
+                match column {
+                    '0' => grid.push(None),
+                    '1' => grid.push(Some(Block {
+                        color: Color::Blue,
+                    })),
+                    _ => panic!("Invalid board construction data"),
+                }
+            }
+        }
+
+        Board {
+            grid,
+            num_columns,
+            active_piece: None,
+        }
+    }
+}
+
+/**
+ * Board getters
+ */
+impl Board {
     pub fn get_num_columns(&self) -> usize {
         self.num_columns
     }
+}
 
-    pub fn debug(&mut self) {
-        self.grid[20] = Some(Block { });
-        self.grid[21] = Some(Block { });
-        self.grid[22] = Some(Block { });
-        self.grid[23] = Some(Block { });
-        self.grid[24] = Some(Block { });
-    }
-
+impl Board {
     pub fn spawn_piece(&mut self, piece: Piece, position: usize) {
         let active_piece = ActivePiece::new(piece, position);
 
@@ -98,13 +124,17 @@ impl Board {
             .normalized_cell_iter(self, settings)
             .collect();
 
+        let piece_color = active_piece.get_color();
+
         for cell in normalized_cells {
             let index = cell.board_line * self.num_columns + cell.board_column;
             let board_cell = &mut self.grid[index];
 
             match board_cell {
                 Some(_) => panic!("Cell clash during materialization"),
-                None => *board_cell = Some(Block { }),
+                None => *board_cell = Some(Block {
+                    color: (*piece_color).clone()
+                }),
             }
         }
     }

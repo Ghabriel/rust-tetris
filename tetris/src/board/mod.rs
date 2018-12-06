@@ -4,8 +4,10 @@ mod iteration;
 
 pub use self::board::*;
 
+use piece::Color;
+
 pub struct Block {
-    // color: Color,
+    color: Color,
 }
 
 pub struct Position(usize, usize);

@@ -11,6 +11,7 @@ pub enum PieceKind {
 
 pub struct PieceGrid(pub Vec<bool>);
 
+#[derive(Clone)]
 pub enum Color {
     Cyan,
     Orange,

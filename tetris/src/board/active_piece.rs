@@ -4,7 +4,7 @@ use board::iteration::{
     NormalizedCellIterator,
     NormalizedCellReverseIterator,
 };
-use piece::Piece;
+use piece::{Color, Piece};
 use rotations::RotationSystem;
 use settings::Settings;
 
@@ -19,6 +19,10 @@ impl ActivePiece {
             piece,
             position,
         }
+    }
+
+    pub fn get_color(&self) -> &Color {
+        self.piece.get_color()
     }
 
     pub fn shift(&mut self, offset: isize) {
