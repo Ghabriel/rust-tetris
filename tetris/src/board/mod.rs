@@ -11,3 +11,6 @@ pub struct Block {
 }
 
 pub struct Position(usize, usize);
+
+#[cfg(test)]
+mod tests;

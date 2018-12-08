@@ -30,8 +30,12 @@ impl Board {
     }
 
     pub fn from_array(rows: &[&str]) -> Board {
-        let grid_size = rows.len();
-        let num_columns = (grid_size as f64).sqrt() as usize;
+        let num_rows = rows.len();
+
+        assert!(num_rows > 0, "empty board data array");
+
+        let num_columns = rows[0].len();
+        let grid_size = num_rows * num_columns;
         let mut grid = Vec::with_capacity(grid_size);
 
         for row in rows {
@@ -55,11 +59,25 @@ impl Board {
 }
 
 /**
- * Board getters
+ * Board getters/checkers
  */
 impl Board {
     pub fn get_num_columns(&self) -> usize {
         self.num_columns
+    }
+
+    pub fn is_occupied(&self, row: usize, column: usize) -> bool {
+        self.at(row, column).is_some()
+    }
+
+    pub fn get_filled_rows(&self) -> Vec<usize> {
+        self.rows()
+            .enumerate()
+            .filter(|(_, row)| {
+                row.iter().all(|cell| cell.is_some())
+            })
+            .map(|(index, _)| index)
+            .collect()
     }
 }
 
@@ -68,10 +86,6 @@ impl Board {
         let active_piece = ActivePiece::new(piece, position);
 
         self.active_piece = Some(active_piece);
-    }
-
-    pub fn is_occupied(&self, row: usize, column: usize) -> bool {
-        self.at(row, column).is_some()
     }
 
     pub fn tick(&mut self, settings: &Settings) {
@@ -85,9 +99,14 @@ impl Board {
         }
 
         self.materialize_active_piece(settings);
-        self.check_line_clears(settings);
+        self.clear_filled_rows(settings);
     }
+}
 
+/**
+ * Private methods
+ */
+impl Board {
     fn has_active_piece(&self) -> bool {
         self.active_piece.is_some()
     }
@@ -139,17 +158,14 @@ impl Board {
         }
     }
 
-    pub fn check_line_clears(&mut self, _settings: &Settings) {
-        let num_cleared_lines = self.rows()
-            .enumerate()
-            .filter(|(_, row)| {
-                row.iter().all(|cell| cell.is_some())
-            })
-            .map(|(index, _)| index)
-            .inspect(|index| println!("Row {} should be cleared", index))
-            .count();
+    fn clear_filled_rows(&mut self, settings: &Settings) {
+        let filled_rows = self.get_filled_rows();
 
-        println!("# cleared rows: {}", num_cleared_lines);
+        self.clear_rows(&filled_rows, settings);
+    }
+
+    fn clear_rows(&mut self, rows: &[usize], settings: &Settings) {
+        // TODO
     }
 
     fn at(&self, row: usize, column: usize) -> &Option<Block> {

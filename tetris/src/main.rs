@@ -9,4 +9,6 @@ fn main() {
         "11111",
         "11111",
     ]);
+
+    board.get_filled_rows();
 }
