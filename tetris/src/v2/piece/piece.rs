@@ -1,17 +1,15 @@
-pub mod properties;
+use v2::piece::{PieceColor, PieceGrid, PieceKind};
 
-pub use self::properties::{Color, PieceGrid, PieceKind};
-
-use rotations::{RotationSystem, RotationTable};
+use v2::rotations::{RotationSystem, RotationTable};
 
 pub struct Piece {
     kind: PieceKind,
-    color: Color,
+    color: PieceColor,
     rotation_index: usize,
 }
 
 impl Piece {
-    pub fn new(kind: PieceKind, color: Color, rotation_index: usize) -> Piece {
+    pub fn new(kind: PieceKind, color: PieceColor, rotation_index: usize) -> Piece {
         Piece { kind, color, rotation_index }
     }
 
@@ -28,7 +26,7 @@ impl Piece {
         &rotation_table[self.rotation_index]
     }
 
-    pub fn get_color(&self) -> &Color {
+    pub fn get_color(&self) -> &PieceColor {
         &self.color
     }
 
