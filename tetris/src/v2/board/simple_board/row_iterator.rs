@@ -1,4 +1,5 @@
-use v2::board::{Block, SimpleBoard};
+use super::super::Block;
+use super::SimpleBoard;
 
 pub struct SimpleBoardRowIterator<'a> {
     board: &'a SimpleBoard,

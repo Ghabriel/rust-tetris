@@ -4,6 +4,3 @@
 // pub mod settings;
 
 pub mod v2;
-
-#[cfg(test)]
-mod tests;

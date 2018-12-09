@@ -1,4 +1,4 @@
-use v2::board::{Block, Board};
+use super::super::{Block, Board};
 use v2::piece::{Piece, PieceColor};
 use v2::settings::Settings;
 

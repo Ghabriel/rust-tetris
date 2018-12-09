@@ -1,8 +1,6 @@
-use v2::piece::{PieceGrid, PieceKind};
 use std::collections::HashMap;
-
-pub type RotationSystem = HashMap<PieceKind, RotationTable>;
-pub type RotationTable = Vec<PieceGrid>;
+use super::super::piece::PieceKind;
+use super::{make_rotation_table, RotationSystem, RotationTable};
 
 pub fn build_nintendo_rotation_system() -> RotationSystem {
     let mut result = HashMap::new();
@@ -70,22 +68,4 @@ fn nintendo_rotation_z() -> RotationTable {
         &["000", "110", "011"],
         &["001", "011", "010"],
     ]);
-}
-
-fn make_rotation_table(grids: &[&[&str]]) -> RotationTable {
-    let mut result = Vec::new();
-
-    for grid in grids {
-        let mut parsed_grid = PieceGrid(Vec::new());
-
-        for row in grid.iter() {
-            for value in row.chars() {
-                parsed_grid.0.push(value == '1');
-            }
-        }
-
-        result.push(parsed_grid);
-    }
-
-    result
 }
