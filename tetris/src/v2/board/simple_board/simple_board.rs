@@ -1,6 +1,6 @@
+use super::super::super::piece::{Piece, PieceColor};
+use super::super::super::settings::Settings;
 use super::super::{Block, Board};
-use v2::piece::{Piece, PieceColor};
-use v2::settings::Settings;
 
 pub struct SimpleBoard {
     grid: Vec<Option<Block>>,

@@ -1,9 +1,8 @@
-use std::collections::HashMap;
 use super::super::piece::PieceKind;
 use super::{make_rotation_table, RotationSystem, RotationTable};
 
 pub fn build_nintendo_rotation_system() -> RotationSystem {
-    let mut result = HashMap::new();
+    let mut result = RotationSystem::new();
 
     result.insert(PieceKind::I, nintendo_rotation_i());
     result.insert(PieceKind::J, nintendo_rotation_j());

@@ -1,6 +1,5 @@
-use v2::piece::{PieceColor, PieceGrid, PieceKind};
-
-use v2::rotations::{RotationSystem, RotationTable};
+use super::super::rotations::{RotationSystem, RotationTable};
+use super::{PieceColor, PieceGrid, PieceKind};
 
 pub struct Piece {
     kind: PieceKind,

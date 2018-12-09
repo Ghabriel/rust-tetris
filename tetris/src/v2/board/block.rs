@@ -1,4 +1,4 @@
-use v2::piece::PieceColor;
+use super::super::piece::PieceColor;
 
 pub struct Block {
     pub color: PieceColor,

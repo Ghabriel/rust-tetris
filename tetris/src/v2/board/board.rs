@@ -1,5 +1,5 @@
-use v2::piece::Piece;
-use v2::settings::Settings;
+use super::super::piece::Piece;
+use super::super::settings::Settings;
 
 pub trait Board {
     /**
