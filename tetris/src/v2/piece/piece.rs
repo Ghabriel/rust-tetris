@@ -1,4 +1,4 @@
-use super::super::rotations::{RotationSystem, RotationTable};
+use super::super::rotations::{RotationDirection, RotationSystem, RotationTable};
 use super::{PieceColor, PieceGrid, PieceKind};
 
 pub struct Piece {
@@ -12,11 +12,20 @@ impl Piece {
         Piece { kind, color, rotation_index }
     }
 
-    pub fn rotate(&mut self, rotation_system: &RotationSystem) {
+    pub fn rotate(&mut self, direction: RotationDirection, rotation_system: &RotationSystem) {
         let rotation_table = self.get_rotation_table(rotation_system);
+        let num_rotations = rotation_table.len();
 
-        self.rotation_index += 1;
-        self.rotation_index %= rotation_table.len();
+        match direction {
+            RotationDirection::Clockwise => {
+                self.rotation_index += 1;
+                self.rotation_index %= num_rotations;
+            },
+            RotationDirection::Counterclockwise => {
+                self.rotation_index += num_rotations - 1;
+                self.rotation_index %= num_rotations;
+            }
+        }
     }
 
     pub fn get_grid<'a>(&self, rotation_system: &'a RotationSystem) -> &'a PieceGrid {
