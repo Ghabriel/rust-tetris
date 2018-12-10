@@ -1,4 +1,5 @@
 use super::super::super::piece::{Piece, PieceColor};
+use super::super::super::rotations::RotationSystem;
 use super::super::super::settings::Settings;
 use super::super::{Block, Board};
 use super::row_iterator::RowIterator;
@@ -63,6 +64,39 @@ impl SimpleBoard {
     }
 }
 
+impl SimpleBoard {
+    fn to_board_coordinates<'a>(
+        &self,
+        piece: &'a Piece,
+        position: usize,
+        rotation_system: &'a RotationSystem
+    ) -> impl Iterator<Item = usize> + 'a {
+        let grid = piece.get_grid(rotation_system);
+        let grid_num_columns = (grid.0.len() as f64).sqrt() as usize;
+        let board_num_columns = self.get_num_columns();
+
+        grid.0.iter()
+            .enumerate()
+            .filter(|(_, cell)| **cell)
+            .map(move |(index, _)| {
+                // the grid position, in board coordinates: pos(grid, board)
+                let base_row = position / board_num_columns;
+                let base_column = position % board_num_columns;
+
+                // the cell position, in grid coordinates: pos(cell, grid)
+                let cell_grid_row = index / grid_num_columns;
+                let cell_grid_column = index % grid_num_columns;
+
+                // the cell position, in board coordinates:
+                // pos(cell, board) = pos(cell, grid) + pos(grid, board)
+                let row = base_row + cell_grid_row;
+                let column = base_column + cell_grid_column;
+
+                row * board_num_columns + column
+            })
+    }
+}
+
 impl Board for SimpleBoard {
     fn get_num_columns(&self) -> usize {
         self.num_columns
@@ -79,23 +113,22 @@ impl Board for SimpleBoard {
     }
 
     fn materialize(&mut self, piece: Piece, position: usize, settings: &Settings) {
-        // let normalized_cells: Vec<NormalizedCell> = piece
-        //     .normalized_cell_iter(self, settings)
-        //     .collect();
+        let cell_positions: Vec<usize> = self
+            .to_board_coordinates(&piece, position, &settings.rotation_system)
+            .collect();
 
-        // let piece_color = piece.get_color();
+        let piece_color = piece.get_color();
 
-        // for cell in normalized_cells {
-        //     let index = cell.board_line * self.num_columns + cell.board_column;
-        //     let board_cell = &mut self.grid[index];
+        for index in cell_positions {
+            let board_cell = &mut self.grid[index];
 
-        //     match board_cell {
-        //         Some(_) => panic!("Cell clash during materialization"),
-        //         None => *board_cell = Some(Block {
-        //             color: (*piece_color).clone()
-        //         }),
-        //     }
-        // }
+            match board_cell {
+                Some(_) => panic!("Cell clash during materialization"),
+                None => *board_cell = Some(Block {
+                    color: (*piece_color).clone()
+                }),
+            }
+        }
     }
 
     fn get_filled_rows(&self) -> Vec<usize> {
