@@ -1,6 +1,7 @@
 use super::super::super::piece::{Piece, PieceColor};
 use super::super::super::settings::Settings;
 use super::super::{Block, Board};
+use super::row_iterator::RowIterator;
 
 pub struct SimpleBoard {
     grid: Vec<Option<Block>>,
@@ -8,7 +9,7 @@ pub struct SimpleBoard {
 }
 
 impl SimpleBoard {
-    pub fn new(num_rows: usize, num_columns: usize) -> SimpleBoard {
+    pub fn new(num_columns: usize, num_rows: usize) -> SimpleBoard {
         let grid_size = num_rows * num_columns;
         let mut grid = Vec::with_capacity(grid_size);
 
@@ -49,14 +50,26 @@ impl SimpleBoard {
         }
     }
 
-    // fn rows<'a>(&'a self) -> SimpleBoardRowIterator<'a> {
-    //     SimpleBoardRowIterator::new(self)
-    // }
+    pub fn len(&self) -> usize {
+        self.grid.len()
+    }
+
+    pub fn cells(&self) -> impl Iterator<Item = &Option<Block>> {
+        self.grid.iter()
+    }
+
+    pub fn rows<'a>(&'a self) -> RowIterator<'a> {
+        RowIterator::new(self)
+    }
 }
 
 impl Board for SimpleBoard {
     fn get_num_columns(&self) -> usize {
         self.num_columns
+    }
+
+    fn get_num_rows(&self) -> usize {
+        self.grid.len() / self.num_columns
     }
 
     fn is_occupied(&self, row: usize, column: usize) -> bool {
@@ -86,16 +99,13 @@ impl Board for SimpleBoard {
     }
 
     fn get_filled_rows(&self) -> Vec<usize> {
-        // self.rows()
-        //     .enumerate()
-        //     .filter(|(_, row)| {
-        //         row.iter().all(|cell| cell.is_some())
-        //     })
-        //     .map(|(index, _)| index)
-        //     .collect()
-
-        // TODO
-        vec![]
+        self.rows()
+            .enumerate()
+            .filter(|(_, row)| {
+                row.iter().all(|cell| cell.is_some())
+            })
+            .map(|(index, _)| index)
+            .collect()
     }
 
     fn clear_rows(&mut self, _rows: &[usize], _settings: &Settings) {

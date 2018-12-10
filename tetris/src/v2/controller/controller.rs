@@ -1,11 +1,11 @@
-struct CurrentPiece {
-    piece: Piece,
-    position: usize,
-}
-
 struct Controller {
     board: Box<dyn Board>,
     current_piece: Option<CurrentPiece>,
+}
+
+struct CurrentPiece {
+    piece: Piece,
+    position: usize,
 }
 
 impl Controller {

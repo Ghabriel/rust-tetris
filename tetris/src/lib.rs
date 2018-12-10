@@ -3,4 +3,6 @@
 // pub mod rotations;
 // pub mod settings;
 
-pub mod v2;
+mod v2;
+
+pub use self::v2::*;

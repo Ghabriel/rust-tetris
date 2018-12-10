@@ -1,6 +1,4 @@
-extern crate tetris;
-
-use tetris::v2::board::SimpleBoard;
+use tetris::board::SimpleBoard;
 
 fn main() {
     let board = SimpleBoard::from_array(&[
