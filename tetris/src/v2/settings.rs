@@ -1,3 +1,4 @@
+use super::gravity::Gravity;
 use super::rotations::RotationSystem;
 
 pub struct Settings {

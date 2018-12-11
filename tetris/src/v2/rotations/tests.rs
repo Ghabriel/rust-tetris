@@ -1,5 +1,5 @@
 use super::super::piece::{PieceColor, Piece, PieceGrid, PieceKind};
-use super::{build_nintendo_rotation_system, RotationSystem};
+use super::{build_nintendo_rotation_system, RotationDirection, RotationSystem};
 
 #[test]
 fn nintendo_rotation_i() {
@@ -8,10 +8,10 @@ fn nintendo_rotation_i() {
     let mut piece = new_piece(PieceKind::I, 0);
     assert_grid_eq(&piece, &rotation_system, "0000/0000/1111/0000");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "0010/0010/0010/0010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "0000/0000/1111/0000");
 }
 
@@ -22,16 +22,16 @@ fn nintendo_rotation_j() {
     let mut piece = new_piece(PieceKind::J, 0);
     assert_grid_eq(&piece, &rotation_system, "000/111/001");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/010/110");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "100/111/000");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "011/010/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "000/111/001");
 }
 
@@ -42,16 +42,16 @@ fn nintendo_rotation_l() {
     let mut piece = new_piece(PieceKind::L, 0);
     assert_grid_eq(&piece, &rotation_system, "000/111/100");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "110/010/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "001/111/000");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/010/011");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "000/111/100");
 }
 
@@ -62,7 +62,7 @@ fn nintendo_rotation_o() {
     let mut piece = new_piece(PieceKind::O, 0);
     assert_grid_eq(&piece, &rotation_system, "11/11");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "11/11");
 }
 
@@ -73,10 +73,10 @@ fn nintendo_rotation_s() {
     let mut piece = new_piece(PieceKind::S, 0);
     assert_grid_eq(&piece, &rotation_system, "000/011/110");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/011/001");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "000/011/110");
 }
 
@@ -87,16 +87,16 @@ fn nintendo_rotation_t() {
     let mut piece = new_piece(PieceKind::T, 0);
     assert_grid_eq(&piece, &rotation_system, "000/111/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/110/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/111/000");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/011/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "000/111/010");
 }
 
@@ -107,10 +107,10 @@ fn nintendo_rotation_z() {
     let mut piece = new_piece(PieceKind::Z, 0);
     assert_grid_eq(&piece, &rotation_system, "000/110/011");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "001/011/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "000/110/011");
 }
 
@@ -121,16 +121,16 @@ fn nintendo_rotation_t_different_initial_state() {
     let mut piece = new_piece(PieceKind::T, 1);
     assert_grid_eq(&piece, &rotation_system, "010/110/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/111/000");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/011/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "000/111/010");
 
-    piece.rotate(&rotation_system);
+    piece.rotate(RotationDirection::Clockwise, &rotation_system);
     assert_grid_eq(&piece, &rotation_system, "010/110/010");
 }
 

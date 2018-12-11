@@ -113,22 +113,19 @@ impl Board for SimpleBoard {
     }
 
     fn materialize(&mut self, piece: Piece, position: usize, settings: &Settings) {
-        let cell_positions: Vec<usize> = self
-            .to_board_coordinates(&piece, position, &settings.rotation_system)
-            .collect();
-
         let piece_color = piece.get_color();
 
-        for index in cell_positions {
-            let board_cell = &mut self.grid[index];
+        self.to_board_coordinates(&piece, position, &settings.rotation_system)
+            .for_each(|index| {
+                let board_cell = &mut self.grid[index];
 
-            match board_cell {
-                Some(_) => panic!("Cell clash during materialization"),
-                None => *board_cell = Some(Block {
-                    color: (*piece_color).clone()
-                }),
-            }
-        }
+                match board_cell {
+                    Some(_) => panic!("Cell clash during materialization"),
+                    None => *board_cell = Some(Block {
+                        color: (*piece_color).clone()
+                    }),
+                }
+            });
     }
 
     fn get_filled_rows(&self) -> Vec<usize> {
