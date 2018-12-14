@@ -1,4 +1,5 @@
 pub mod board_gravity_pair;
+pub mod factory;
 mod gravity;
 mod naive;
 
