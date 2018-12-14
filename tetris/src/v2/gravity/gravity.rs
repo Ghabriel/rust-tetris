@@ -1,4 +1,4 @@
-use super::factory::NaiveFactory;
+use super::naive::NaiveFactory;
 
 pub enum Gravity {
     Naive(NaiveFactory),

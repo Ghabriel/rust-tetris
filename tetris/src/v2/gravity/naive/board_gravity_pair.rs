@@ -1,9 +1,7 @@
-use super::super::super::{
-    board::SimpleBoard,
-    gravity::NaiveGravity,
-    settings::Settings,
-};
-use super::BoardGravityPair;
+use super::super::super::board::SimpleBoard;
+use super::super::super::settings::Settings;
+use super::super::BoardGravityPair;
+use super::NaiveGravity;
 
 pub struct NaiveGravityPair {
     board: SimpleBoard,

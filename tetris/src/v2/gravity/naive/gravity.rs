@@ -1,7 +1,5 @@
-use super::super::super::{
-    board::SimpleBoard,
-    settings::Settings,
-};
+use super::super::super::board::SimpleBoard;
+use super::super::super::settings::Settings;
 
 pub struct NaiveGravity {}
 

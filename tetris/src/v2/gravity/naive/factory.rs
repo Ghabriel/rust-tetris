@@ -1,5 +1,5 @@
 use super::super::super::board::SimpleBoard;
-use super::naive::NaiveGravity;
+use super::NaiveGravity;
 
 pub struct NaiveFactory {}
 

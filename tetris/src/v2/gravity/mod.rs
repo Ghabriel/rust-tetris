@@ -1,7 +1,6 @@
-pub mod board_gravity_pair;
-pub mod factory;
+mod board_gravity_pair;
 mod gravity;
-mod naive;
+pub mod naive;
 
 pub use self::gravity::Gravity;
-pub use self::naive::NaiveGravity;
+pub use self::board_gravity_pair::BoardGravityPair;
