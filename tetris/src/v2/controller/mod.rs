@@ -1,9 +1,12 @@
-use super::gravity::BoardGravityPair;
+use super::board::SimpleBoard;
+use super::gravity::{BoardGravityPair, Gravity};
+use super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::piece::Piece;
 
 pub struct Controller {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     current_piece: Option<CurrentPiece>,
+    board_size: (usize, usize),
 }
 
 pub struct CurrentPiece {
@@ -11,7 +14,21 @@ pub struct CurrentPiece {
     position: usize,
 }
 
-// impl Controller {
+impl Controller {
+    pub fn change_gravity(&mut self, gravity: Gravity) {
+        match gravity {
+            Gravity::Naive => {
+                let (num_columns, num_rows) = self.board_size;
+                let board = SimpleBoard::new(num_columns, num_rows);
+                let gravity_instance = NaiveGravity::new();
+
+                self.board_gravity_pair = Box::new(
+                    NaiveGravityPair::new(board, gravity_instance)
+                );
+            }
+        }
+    }
+
 //     pub fn has_active_piece(&self) -> bool {
 //         self.current_piece.is_some()
 //     }
@@ -31,4 +48,4 @@ pub struct CurrentPiece {
 //         self.materialize_active_piece(settings);
 //         self.clear_filled_rows(settings);
 //     }
-// }
+}
