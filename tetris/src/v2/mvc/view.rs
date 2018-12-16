@@ -1,12 +1,19 @@
 use sfml::graphics::{CircleShape, RenderTarget, RenderWindow};
 use sfml::window::{Event, Style};
+use super::Model;
 
-pub struct View {
+pub struct View<'a> {
+    model: &'a Model,
     window: RenderWindow,
 }
 
-impl View {
-    pub fn new(width: u32, height: u32, title: &str) -> View {
+impl<'a> View<'a> {
+    pub fn new<'b>(
+        model: &'b Model,
+        width: u32,
+        height: u32,
+        title: &str
+    ) -> View<'b> {
         let window = RenderWindow::new(
             (width, height),
             title,
@@ -15,7 +22,8 @@ impl View {
         );
 
         View {
-            window
+            window,
+            model,
         }
     }
 

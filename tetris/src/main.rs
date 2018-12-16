@@ -1,4 +1,7 @@
-use tetris::gui::View;
+use tetris::gravity::Gravity;
+use tetris::mvc::{Controller, Model, View};
+use tetris::rotations;
+use tetris::settings::Settings;
 
 // use tetris::board::SimpleBoard;
 
@@ -12,7 +15,15 @@ fn main() {
 
     // board.get_filled_rows();
 
-    let mut view = View::new(800, 600, "Tetris");
+    let settings = Settings {
+        board_size: (10, 20),
+        gravity: Gravity::Naive,
+        rotation_system: rotations::build_nintendo_rotation_system(),
+    };
+
+    let mut model = Model::new(settings);
+    let mut view = View::new(&model, 800, 600, "Tetris");
+    let mut controller = Controller::new(&mut model);
 
     view.init();
 }
