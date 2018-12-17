@@ -23,14 +23,8 @@ fn main() {
         rotation_system: rotations::build_nintendo_rotation_system(),
     };
 
-    let model = Rc::new(
-        RefCell::new(
-            Model::new(settings)
-        )
-    );
-    let controller = Controller::new(
-        Rc::clone(&model)
-    );
+    let mut model = Rc::new(Model::new(settings));
+    let controller = Controller::new(Rc::clone(&model));
     let mut view = Rc::new(
         RefCell::new(
             View::new(controller, 800, 600, "Tetris")
@@ -38,7 +32,7 @@ fn main() {
     );
 
     let view_clone = Rc::clone(&view);
-    model.borrow_mut().add_event_listener(view_clone);
+    Rc::get_mut(&mut model).unwrap().add_event_listener(view_clone);
 
     Rc::get_mut(&mut view).unwrap().borrow_mut().init();
 }
