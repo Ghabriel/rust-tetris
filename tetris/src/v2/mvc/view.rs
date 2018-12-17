@@ -1,16 +1,15 @@
 use sfml::graphics::{CircleShape, RenderTarget, RenderWindow};
 use sfml::window::{Event, Style};
 use super::{Controller, EventListener};
-use std::cell::RefCell;
 
 pub struct View {
-    controller: RefCell<Controller>,
+    controller: Controller,
     window: RenderWindow,
 }
 
 impl View {
     pub fn new(
-        controller: RefCell<Controller>,
+        controller: Controller,
         width: u32,
         height: u32,
         title: &str
@@ -23,8 +22,8 @@ impl View {
         );
 
         View {
-            window,
             controller,
+            window,
         }
     }
 

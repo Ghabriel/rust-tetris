@@ -28,10 +28,8 @@ fn main() {
             Model::new(settings)
         )
     );
-    let controller = RefCell::new(
-        Controller::new(
-            Rc::clone(&model)
-        )
+    let controller = Controller::new(
+        Rc::clone(&model)
     );
     let mut view = Rc::new(
         RefCell::new(
@@ -39,8 +37,8 @@ fn main() {
         )
     );
 
-    let foo = Rc::clone(&view);
-    model.borrow_mut().add_event_listener(foo);
+    let view_clone = Rc::clone(&view);
+    model.borrow_mut().add_event_listener(view_clone);
 
     Rc::get_mut(&mut view).unwrap().borrow_mut().init();
 }
