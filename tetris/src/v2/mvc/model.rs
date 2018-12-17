@@ -5,12 +5,13 @@ use super::super::piece::Piece;
 use super::super::settings::Settings;
 use super::EventListener;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     current_piece: Option<CurrentPiece>,
     settings: Settings,
-    listeners: Vec<Rc<EventListener>>,
+    listeners: Vec<Rc<RefCell<EventListener>>>,
 }
 
 pub struct CurrentPiece {
@@ -28,7 +29,7 @@ impl Model {
         }
     }
 
-    pub fn add_event_listener(&mut self, listener: Rc<EventListener>) {
+    pub fn add_event_listener(&mut self, listener: Rc<RefCell<EventListener>>) {
         self.listeners.push(listener);
     }
 
