@@ -2,6 +2,8 @@ use tetris::gravity::Gravity;
 use tetris::mvc::{Controller, Model, View};
 use tetris::rotations;
 use tetris::settings::Settings;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 // use tetris::board::SimpleBoard;
 
@@ -21,9 +23,24 @@ fn main() {
         rotation_system: rotations::build_nintendo_rotation_system(),
     };
 
-    let mut model = Model::new(settings);
-    let mut view = View::new(&model, 800, 600, "Tetris");
-    let mut controller = Controller::new(&mut model);
+    let model = Rc::new(
+        RefCell::new(
+            Model::new(settings)
+        )
+    );
+    let controller = RefCell::new(
+        Controller::new(
+            Rc::clone(&model)
+        )
+    );
+    let mut view = Rc::new(
+        RefCell::new(
+            View::new(controller, 800, 600, "Tetris")
+        )
+    );
 
-    view.init();
+    let foo = Rc::clone(&view);
+    model.borrow_mut().add_event_listener(foo);
+
+    Rc::get_mut(&mut view).unwrap().borrow_mut().init();
 }

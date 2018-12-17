@@ -3,11 +3,15 @@ use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::Piece;
 use super::super::settings::Settings;
+use super::EventListener;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     current_piece: Option<CurrentPiece>,
     settings: Settings,
+    listeners: Vec<Rc<RefCell<EventListener>>>,
 }
 
 pub struct CurrentPiece {
@@ -21,7 +25,12 @@ impl Model {
             board_gravity_pair: get_boxed_gravity(&settings.gravity, &settings.board_size),
             current_piece: None,
             settings: settings,
+            listeners: Vec::new(),
         }
+    }
+
+    pub fn add_event_listener(&mut self, listener: Rc<RefCell<EventListener>>) {
+        self.listeners.push(listener);
     }
 
     pub fn change_gravity(&mut self, gravity: Gravity) {
