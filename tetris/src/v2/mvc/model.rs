@@ -4,14 +4,13 @@ use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::Piece;
 use super::super::settings::Settings;
 use super::EventListener;
-use std::cell::RefCell;
 use std::rc::Rc;
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     current_piece: Option<CurrentPiece>,
     settings: Settings,
-    listeners: Vec<Rc<RefCell<EventListener>>>,
+    listeners: Vec<Rc<EventListener>>,
 }
 
 pub struct CurrentPiece {
@@ -29,7 +28,7 @@ impl Model {
         }
     }
 
-    pub fn add_event_listener(&mut self, listener: Rc<RefCell<EventListener>>) {
+    pub fn add_event_listener(&mut self, listener: Rc<EventListener>) {
         self.listeners.push(listener);
     }
 

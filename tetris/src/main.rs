@@ -2,7 +2,6 @@ use tetris::gravity::Gravity;
 use tetris::mvc::{Controller, Model, View};
 use tetris::rotations;
 use tetris::settings::Settings;
-use std::cell::RefCell;
 use std::rc::Rc;
 
 // use tetris::board::SimpleBoard;
@@ -26,13 +25,11 @@ fn main() {
     let mut model = Rc::new(Model::new(settings));
     let controller = Controller::new(Rc::clone(&model));
     let mut view = Rc::new(
-        RefCell::new(
-            View::new(controller, 800, 600, "Tetris")
-        )
+        View::new(controller, 800, 600, "Tetris")
     );
 
     let view_clone = Rc::clone(&view);
     Rc::get_mut(&mut model).unwrap().add_event_listener(view_clone);
 
-    Rc::get_mut(&mut view).unwrap().borrow_mut().init();
+    Rc::get_mut(&mut view).unwrap().init();
 }
