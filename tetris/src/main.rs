@@ -21,7 +21,7 @@ fn main() {
         rotation_system: rotations::build_nintendo_rotation_system(),
     };
 
-    let model = Model::new(settings);
+    let mut model = Model::new(settings);
     let controller = Controller::new(model);
     let mut view = View::new(controller, 800, 600, "Tetris");
 
