@@ -28,6 +28,9 @@ impl<'a> View<'a> {
     }
 
     pub fn init(&mut self) {
+        let model = self.controller.model_mut();
+        model.add_event_listener(self);
+
         let window = &mut self.window;
         let shape = CircleShape::new(100., 30);
 

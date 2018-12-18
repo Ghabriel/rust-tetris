@@ -25,7 +25,5 @@ fn main() {
     let controller = Controller::new(model);
     let mut view = View::new(controller, 800, 600, "Tetris");
 
-    model.add_event_listener(&mut view);
-
     view.init();
 }

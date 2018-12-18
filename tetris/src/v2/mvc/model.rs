@@ -4,8 +4,6 @@ use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::Piece;
 use super::super::settings::Settings;
 use super::EventListener;
-use std::rc::Rc;
-use std::cell::RefCell;
 
 pub struct Model<'a> {
     board_gravity_pair: Box<dyn BoardGravityPair>,
