@@ -7,11 +7,11 @@ use super::EventListener;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-pub struct Model {
+pub struct Model<'a> {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     current_piece: Option<CurrentPiece>,
     settings: Settings,
-    listeners: Vec<Rc<RefCell<EventListener>>>,
+    listeners: Vec<&'a mut EventListener>,
 }
 
 pub struct CurrentPiece {
@@ -19,8 +19,8 @@ pub struct CurrentPiece {
     position: usize,
 }
 
-impl Model {
-    pub fn new(settings: Settings) -> Model {
+impl<'a> Model<'a> {
+    pub fn new(settings: Settings) -> Model<'a> {
         Model {
             board_gravity_pair: get_boxed_gravity(&settings.gravity, &settings.board_size),
             current_piece: None,
@@ -29,7 +29,7 @@ impl Model {
         }
     }
 
-    pub fn add_event_listener(&mut self, listener: Rc<RefCell<EventListener>>) {
+    pub fn add_event_listener(&mut self, listener: &'a mut EventListener) {
         self.listeners.push(listener);
     }
 

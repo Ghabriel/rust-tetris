@@ -2,18 +2,18 @@ use sfml::graphics::{CircleShape, RenderTarget, RenderWindow};
 use sfml::window::{Event, Style};
 use super::{Controller, EventListener};
 
-pub struct View {
-    controller: Controller,
+pub struct View<'a> {
+    controller: Controller<'a>,
     window: RenderWindow,
 }
 
-impl View {
-    pub fn new(
-        controller: Controller,
+impl<'a> View<'a> {
+    pub fn new<'b>(
+        controller: Controller<'b>,
         width: u32,
         height: u32,
         title: &str
-    ) -> View {
+    ) -> View<'b> {
         let window = RenderWindow::new(
             (width, height),
             title,
@@ -45,4 +45,4 @@ impl View {
     }
 }
 
-impl EventListener for View {}
+impl<'a> EventListener for View<'a> {}

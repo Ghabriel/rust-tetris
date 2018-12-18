@@ -1,18 +1,16 @@
 use super::super::gravity::Gravity;
 use super::Model;
-use std::rc::Rc;
-use std::cell::RefCell;
 
-pub struct Controller {
-    model: Rc<RefCell<Model>>,
+pub struct Controller<'a> {
+    model: Model<'a>,
 }
 
-impl Controller {
-    pub fn new(model: Rc<RefCell<Model>>) -> Controller {
+impl<'a> Controller<'a> {
+    pub fn new(model: Model) -> Controller {
         Controller { model }
     }
 
     pub fn change_gravity(&mut self, gravity: Gravity) {
-        self.model.borrow_mut().change_gravity(gravity);
+        self.model.change_gravity(gravity);
     }
 }
