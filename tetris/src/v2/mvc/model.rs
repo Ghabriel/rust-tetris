@@ -3,7 +3,12 @@ use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::Piece;
 use super::super::settings::Settings;
-use super::EventListener;
+use super::{Controller, EventListener};
+
+pub struct MC<'a> {
+    pub model: Model<'a>,
+    pub controller: Controller,
+}
 
 pub struct Model<'a> {
     board_gravity_pair: Box<dyn BoardGravityPair>,

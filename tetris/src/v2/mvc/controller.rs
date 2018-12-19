@@ -1,20 +1,14 @@
 use super::super::gravity::Gravity;
 use super::Model;
 
-pub struct Controller<'a> {
-    model: Model<'a>,
-}
+pub struct Controller {}
 
-impl<'a> Controller<'a> {
-    pub fn new(model: Model) -> Controller {
-        Controller { model }
+impl Controller {
+    pub fn new() -> Controller {
+        Controller { }
     }
 
-    pub fn model_mut(&mut self) -> &mut Model<'a> {
-        &mut self.model
-    }
-
-    pub fn change_gravity(&mut self, gravity: Gravity) {
-        self.model.change_gravity(gravity);
+    pub fn change_gravity(&mut self, model: &mut Model, gravity: Gravity) {
+        model.change_gravity(gravity);
     }
 }
