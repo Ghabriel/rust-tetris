@@ -1,3 +1,4 @@
+mod game_loop;
 mod model;
 mod view;
 

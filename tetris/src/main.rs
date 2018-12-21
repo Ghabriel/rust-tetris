@@ -21,11 +21,4 @@ fn main() {
         rotation_system: rotations::build_nintendo_rotation_system(),
     };
 
-    // let model = Model::new(settings);
-    // let controller = Controller::new();
-
-    // let mvc = RefCell::new(MC { model, controller });
-    // let mut view = View::new(mvc, 800, 600, "Tetris");
-
-    // view.init();
 }
