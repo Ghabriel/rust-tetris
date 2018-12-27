@@ -1,4 +1,5 @@
 use std::time::{Duration, Instant};
+use super::traits::{Render, Tick};
 
 static DEFAULT_UPDATE_FREQUENCY: u8 = 25;
 
@@ -11,8 +12,8 @@ pub struct GameLoop<TUpdate, TRender> {
 
 impl<TUpdate, TRender> GameLoop<TUpdate, TRender>
 where
-    TUpdate: Fn(f64) -> bool,
-    TRender: Fn() -> bool,
+    TUpdate: Tick,
+    TRender: Render<Target = TUpdate>,
 {
     pub fn new(update: TUpdate, render: TRender) -> GameLoop<TUpdate, TRender> {
         GameLoop {
@@ -38,14 +39,14 @@ where
             accumulator += elapsed_time as f64;
 
             while accumulator >= self.update_period {
-                if (self.update)(self.update_period) {
+                if self.update.tick(self.update_period) {
                     self.running = false;
                 }
 
                 accumulator -= self.update_period;
             }
 
-            if (self.render)() {
+            if self.render.render(&self.update) {
                 self.running = false;
             }
         }

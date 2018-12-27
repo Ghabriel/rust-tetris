@@ -3,6 +3,7 @@ use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::Piece;
 use super::super::settings::Settings;
+use super::traits::Tick;
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
@@ -13,6 +14,13 @@ pub struct Model {
 pub struct CurrentPiece {
     piece: Piece,
     position: usize,
+}
+
+impl Tick for Model {
+    fn tick(&mut self, elapsed_time: f64) -> bool {
+        // TODO
+        false
+    }
 }
 
 impl Model {
