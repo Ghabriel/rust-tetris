@@ -32,6 +32,8 @@ where
         let mut last_measured_time = Instant::now();
         let mut accumulator = 0.0;
 
+        self.running = true;
+
         while self.running {
             let now = Instant::now();
             let elapsed_time = duration_as_millis(now.duration_since(last_measured_time));

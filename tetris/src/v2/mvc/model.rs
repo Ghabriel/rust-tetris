@@ -1,4 +1,4 @@
-use super::super::board::SimpleBoard;
+use super::super::board::{Block, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::Piece;
@@ -20,6 +20,15 @@ impl Tick for Model {
     fn tick(&mut self, elapsed_time: f64) -> bool {
         // TODO
         false
+    }
+}
+
+/**
+ * Getters used by the view
+ */
+impl Model {
+    pub fn for_each_row(&self, callback: &mut FnMut(&Vec<&Option<Block>>)) {
+        self.board_gravity_pair.board().for_each_row(callback);
     }
 }
 

@@ -1,5 +1,6 @@
 use super::super::piece::Piece;
 use super::super::settings::Settings;
+use super::Block;
 
 pub trait Board {
     /**
@@ -11,6 +12,8 @@ pub trait Board {
     fn materialize(&mut self, piece: Piece, position: usize, settings: &Settings);
     fn get_filled_rows(&self) -> Vec<usize>;
     fn clear_rows(&mut self, rows: &[usize], settings: &Settings);
+
+    fn for_each_row(&self, callback: &mut FnMut(&Vec<&Option<Block>>));
 
     /**
      * Provided methods

@@ -1,5 +1,6 @@
-use sfml::graphics::{CircleShape, RenderTarget, RenderWindow};
+use sfml::graphics::RenderWindow;
 use sfml::window::{Event, Style};
+use super::super::board::Block;
 use super::Model;
 use super::traits::Render;
 
@@ -11,18 +12,16 @@ impl Render for View {
     type Target = Model;
 
     fn render(&mut self, model: &Model) -> bool {
-        let window = &mut self.window;
-
-        while let Some(event) = window.poll_event() {
-            if event == Event::Closed {
-                window.close();
-                return true;
-            }
+        if self.handle_events() {
+            return true;
         }
 
-        window.set_active(true);
-        // window.draw(&shape);
-        window.display();
+        self.window.set_active(true);
+
+        self.render_board(model);
+        self.render_active_piece(model);
+
+        self.window.display();
 
         false
     }
@@ -46,20 +45,33 @@ impl View {
         }
     }
 
-    pub fn init(&mut self) {
-        let window = &mut self.window;
-        let shape = CircleShape::new(100., 30);
-
-        while window.is_open() {
-            while let Some(event) = window.poll_event() {
-                if event == Event::Closed {
-                    window.close();
-                }
+    pub fn handle_events(&mut self) -> bool {
+        while let Some(event) = self.window.poll_event() {
+            if event == Event::Closed {
+                self.window.close();
+                return true;
             }
-
-            window.set_active(true);
-            window.draw(&shape);
-            window.display();
         }
+
+        false
+    }
+
+    pub fn render_board(&mut self, model: &Model) {
+        let mut num_rows = 0;
+
+        model.for_each_row(&mut |row| {
+            num_rows += 1;
+
+            row.iter().for_each(|cell| {
+                println!("Cell: {:?}", cell);
+            });
+        });
+
+        println!("Num rows: {}", num_rows);
+        println!("-----------------------------");
+    }
+
+    pub fn render_active_piece(&mut self, model: &Model) {
+        // TODO
     }
 }

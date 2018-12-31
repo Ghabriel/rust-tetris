@@ -18,7 +18,11 @@ impl NaiveGravityPair {
 }
 
 impl BoardGravityPair for NaiveGravityPair {
-    fn board(&mut self) -> &mut Board {
+    fn board(&self) -> &Board {
+        &self.board
+    }
+
+    fn board_mut(&mut self) -> &mut Board {
         &mut self.board
     }
 

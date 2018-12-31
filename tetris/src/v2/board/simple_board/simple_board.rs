@@ -141,4 +141,11 @@ impl Board for SimpleBoard {
     fn clear_rows(&mut self, _rows: &[usize], _settings: &Settings) {
         // TODO
     }
+
+    fn for_each_row(&self, callback: &mut FnMut(&Vec<&Option<Block>>)) {
+        self.rows()
+            .for_each(|row| {
+                callback(&row);
+            });
+    }
 }
