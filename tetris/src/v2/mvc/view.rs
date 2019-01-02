@@ -1,11 +1,11 @@
-use sfml::graphics::RenderWindow;
+use sfml::graphics::{IntRect, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
 use sfml::window::{Event, Style};
-use super::super::board::Block;
 use super::Model;
 use super::traits::Render;
 
 pub struct View {
     window: RenderWindow,
+    tiles_texture: Texture,
 }
 
 impl Render for View {
@@ -40,8 +40,11 @@ impl View {
             &Default::default()
         );
 
+        let tiles_texture = Texture::from_file("resources/tiles.png").unwrap();
+
         View {
             window,
+            tiles_texture,
         }
     }
 
@@ -57,18 +60,35 @@ impl View {
     }
 
     pub fn render_board(&mut self, model: &Model) {
-        let mut num_rows = 0;
+        let mut tile_sprite = Sprite::with_texture(&self.tiles_texture);
 
-        model.for_each_row(&mut |row| {
-            num_rows += 1;
+        let coordinates = IntRect::new(0, 0, 18, 18);
+        tile_sprite.set_texture_rect(&coordinates);
 
-            row.iter().for_each(|cell| {
-                println!("Cell: {:?}", cell);
-            });
-        });
+        tile_sprite.set_position((0., 0.));
+        self.window.draw(&tile_sprite);
 
-        println!("Num rows: {}", num_rows);
-        println!("-----------------------------");
+        tile_sprite.set_position((18., 0.));
+        self.window.draw(&tile_sprite);
+
+        tile_sprite.set_position((36., 0.));
+        self.window.draw(&tile_sprite);
+
+        tile_sprite.set_position((54., 0.));
+        self.window.draw(&tile_sprite);
+
+        // let mut num_rows = 0;
+
+        // model.for_each_row(&mut |row| {
+        //     num_rows += 1;
+
+        //     row.iter().for_each(|cell| {
+        //         println!("Cell: {:?}", cell);
+        //     });
+        // });
+
+        // println!("Num rows: {}", num_rows);
+        // println!("-----------------------------");
     }
 
     pub fn render_active_piece(&mut self, model: &Model) {
