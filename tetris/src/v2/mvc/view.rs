@@ -4,6 +4,7 @@ use super::Model;
 use super::traits::Render;
 
 const TILE_SIZE: usize = 18;
+const TILE_SCALING: f32 = 1.5;
 
 pub struct View {
     window: RenderWindow,
@@ -20,7 +21,7 @@ impl Render for View {
 
         self.window.set_active(true);
 
-        self.render_board(model);
+        self.render_board(model, (100, 20));
         self.render_active_piece(model);
 
         self.window.display();
@@ -61,10 +62,12 @@ impl View {
         false
     }
 
-    pub fn render_board(&mut self, model: &Model) {
-        let mut tile_sprite = Sprite::with_texture(&self.tiles_texture);
+    pub fn render_board(&mut self, model: &Model, position: (i32, i32)) {
         let window = &mut self.window;
         let mut row_index = 0;
+
+        let mut tile_sprite = Sprite::with_texture(&self.tiles_texture);
+        tile_sprite.scale((TILE_SCALING, TILE_SCALING));
 
         model.for_each_row(&mut |row| {
             row.iter()
@@ -75,7 +78,12 @@ impl View {
                         tile_sprite.set_texture_rect(&tileset_coordinates);
 
                         let cell_coordinates = get_cell_coordinates(row_index, cell_index);
-                        tile_sprite.set_position(cell_coordinates);
+                        tile_sprite.set_position(
+                            (
+                                cell_coordinates.0 + position.0 as f32,
+                                cell_coordinates.1 + position.1 as f32,
+                            )
+                        );
 
                         window.draw(&tile_sprite);
                     // }
@@ -83,19 +91,6 @@ impl View {
 
             row_index += 1;
         });
-
-        // let mut num_rows = 0;
-
-        // model.for_each_row(&mut |row| {
-        //     num_rows += 1;
-
-        //     row.iter().for_each(|cell| {
-        //         println!("Cell: {:?}", cell);
-        //     });
-        // });
-
-        // println!("Num rows: {}", num_rows);
-        // println!("-----------------------------");
     }
 
     pub fn render_active_piece(&mut self, model: &Model) {
@@ -104,5 +99,8 @@ impl View {
 }
 
 fn get_cell_coordinates(row: usize, column: usize) -> (f32, f32) {
-    ((column * TILE_SIZE) as f32, (row * TILE_SIZE) as f32)
+    let x = (column * TILE_SIZE) as f32 * TILE_SCALING;
+    let y = (row * TILE_SIZE) as f32 * TILE_SCALING;
+
+    (x, y)
 }
