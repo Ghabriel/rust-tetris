@@ -1,5 +1,8 @@
 use sfml::graphics::{IntRect, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
 use sfml::window::{Event, Style};
+use super::super::piece::Piece;
+use super::super::rotations::RotationSystem;
+use super::model::CurrentPiece;
 use super::Model;
 use super::traits::Render;
 
@@ -94,7 +97,31 @@ impl View {
     }
 
     pub fn render_active_piece(&mut self, model: &Model) {
-        // TODO
+        if let Some(active_piece) = model.get_active_piece() {
+            let CurrentPiece { piece, position } = active_piece;
+            let rotation_system = model.get_rotation_system();
+
+            self.render_piece(piece, *position, rotation_system);
+        }
+    }
+
+    pub fn render_piece(
+        &mut self,
+        piece: &Piece,
+        position: usize,
+        rotation_system: &RotationSystem
+    ) {
+        let color = piece.get_color();
+        let grid = piece.get_grid(rotation_system);
+        let grid_size = grid.0.len();
+        let grid_num_columns = (grid_size as f32).sqrt() as usize;
+
+        grid.0.iter()
+            .enumerate()
+            .filter(|(_, cell)| **cell)
+            .for_each(|(index, _)| {
+                // TODO
+            });
     }
 }
 

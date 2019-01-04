@@ -2,6 +2,7 @@ use super::super::board::{Block, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::Piece;
+use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
 use super::traits::Tick;
 
@@ -12,8 +13,8 @@ pub struct Model {
 }
 
 pub struct CurrentPiece {
-    piece: Piece,
-    position: usize,
+    pub piece: Piece,
+    pub position: usize,
 }
 
 impl Tick for Model {
@@ -29,6 +30,14 @@ impl Tick for Model {
 impl Model {
     pub fn for_each_row(&self, callback: &mut FnMut(&Vec<&Option<Block>>)) {
         self.board_gravity_pair.board().for_each_row(callback);
+    }
+
+    pub fn get_active_piece(&self) -> &Option<CurrentPiece> {
+        &self.current_piece
+    }
+
+    pub fn get_rotation_system(&self) -> &RotationSystem {
+        &self.settings.rotation_system
     }
 }
 
