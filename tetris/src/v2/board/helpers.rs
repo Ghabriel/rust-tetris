@@ -26,12 +26,12 @@ pub fn piece_to_board_coordinates<'a>(
 
 pub fn piece_cell_to_board_coordinates(
     board_num_columns: usize,
-    piece_cell_index: usize,
+    cell_index_in_grid: usize,
     piece_grid_num_columns: usize,
-    piece_position: usize
+    piece_index_in_board: usize
 ) -> Position {
-    let grid_in_board_coordinates = Position::from_index(piece_position, board_num_columns);
-    let cell_in_grid_coordinates = Position::from_index(piece_cell_index, piece_grid_num_columns);
+    let grid_in_board_coordinates = Position::from_index(piece_index_in_board, board_num_columns);
+    let cell_in_grid_coordinates = Position::from_index(cell_index_in_grid, piece_grid_num_columns);
 
     cell_in_grid_coordinates + grid_in_board_coordinates
 }

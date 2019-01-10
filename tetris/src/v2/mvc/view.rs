@@ -1,6 +1,8 @@
 use sfml::graphics::{IntRect, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
 use sfml::window::{Event, Style};
-use super::super::piece::Piece;
+use super::super::board::helpers;
+use super::super::piece::{Piece, PieceColor};
+use super::super::position::Position;
 use super::super::rotations::RotationSystem;
 use super::model::CurrentPiece;
 use super::Model;
@@ -24,8 +26,9 @@ impl Render for View {
 
         self.window.set_active(true);
 
-        self.render_board(model, (100, 20));
-        self.render_active_piece(model);
+        let board_position = (100, 20);
+        self.render_board(model, board_position);
+        self.render_active_piece(model, board_position);
 
         self.window.display();
 
@@ -69,18 +72,17 @@ impl View {
         let window = &mut self.window;
         let mut row_index = 0;
 
-        let mut tile_sprite = Sprite::with_texture(&self.tiles_texture);
-        tile_sprite.scale((TILE_SCALING, TILE_SCALING));
+        let mut tile_sprite = make_tile_sprite(&self.tiles_texture);
 
         model.for_each_row(&mut |row| {
             row.iter()
                 .enumerate()
                 .for_each(|(cell_index, cell)| {
-                    // if let Some(block) = cell {
+                    if let Some(block) = cell {
                         let tileset_coordinates = IntRect::new(0, 0, 18, 18);
                         tile_sprite.set_texture_rect(&tileset_coordinates);
 
-                        let cell_coordinates = get_cell_coordinates(row_index, cell_index);
+                        let cell_coordinates = get_cell_view_coordinates(row_index, cell_index);
                         tile_sprite.set_position(
                             (
                                 cell_coordinates.0 + position.0 as f32,
@@ -89,29 +91,32 @@ impl View {
                         );
 
                         window.draw(&tile_sprite);
-                    // }
+                    }
                 });
 
             row_index += 1;
         });
     }
 
-    pub fn render_active_piece(&mut self, model: &Model) {
+    pub fn render_active_piece(&mut self, model: &Model, board_position: (i32, i32)) {
         if let Some(active_piece) = model.get_active_piece() {
             let CurrentPiece { piece, position } = active_piece;
             let rotation_system = model.get_rotation_system();
+            let board_num_columns = model.get_board_num_columns();
 
-            self.render_piece(piece, *position, rotation_system);
+            self.render_piece(piece, *position, board_num_columns, rotation_system, board_position);
         }
     }
 
     pub fn render_piece(
         &mut self,
         piece: &Piece,
-        position: usize,
-        rotation_system: &RotationSystem
+        piece_position: usize,
+        board_num_columns: usize,
+        rotation_system: &RotationSystem,
+        board_position: (i32, i32)
     ) {
-        let color = piece.get_color();
+        let piece_color = piece.get_color();
         let grid = piece.get_grid(rotation_system);
         let grid_size = grid.0.len();
         let grid_num_columns = (grid_size as f32).sqrt() as usize;
@@ -120,24 +125,51 @@ impl View {
             .enumerate()
             .filter(|(_, cell)| **cell)
             .for_each(|(index, _)| {
-                let row = index / grid_num_columns;
-                let column = index % grid_num_columns;
+                let block_in_board_coordinates = helpers::piece_cell_to_board_coordinates(
+                    board_num_columns,
+                    index,
+                    grid_num_columns,
+                    piece_position,
+                );
 
-                self.render_block((row, column), position, rotation_system);
+                self.render_block(&block_in_board_coordinates, &piece_color, board_position);
             });
     }
 
     pub fn render_block(
         &mut self,
-        (grid_row, grid_column): (usize, usize),
-        grid_position: usize,
-        rotation_system: &RotationSystem
+        block_in_board_coordinates: &Position,
+        block_color: &PieceColor,
+        board_position: (i32, i32)
     ) {
-        // TODO
+        let mut tile_sprite = make_tile_sprite(&self.tiles_texture);
+
+        let tileset_coordinates = IntRect::new(0, 0, 18, 18);
+        tile_sprite.set_texture_rect(&tileset_coordinates);
+
+        let cell_coordinates = get_cell_view_coordinates(
+            block_in_board_coordinates.row(),
+            block_in_board_coordinates.column(),
+        );
+        tile_sprite.set_position(
+            (
+                cell_coordinates.0 + board_position.0 as f32,
+                cell_coordinates.1 + board_position.1 as f32,
+            )
+        );
+
+        self.window.draw(&tile_sprite);
     }
 }
 
-fn get_cell_coordinates(row: usize, column: usize) -> (f32, f32) {
+fn make_tile_sprite(tile_texture: &Texture) -> Sprite {
+    let mut tile_sprite = Sprite::with_texture(tile_texture);
+    tile_sprite.scale((TILE_SCALING, TILE_SCALING));
+
+    tile_sprite
+}
+
+fn get_cell_view_coordinates(row: usize, column: usize) -> (f32, f32) {
     let x = (column * TILE_SIZE) as f32 * TILE_SCALING;
     let y = (row * TILE_SIZE) as f32 * TILE_SCALING;
 

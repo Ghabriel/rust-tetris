@@ -10,6 +10,14 @@ impl Position {
     pub fn to_index(&self, num_columns: usize) -> usize {
         self.0 * num_columns + self.1
     }
+
+    pub fn row(&self) -> usize {
+        self.0
+    }
+
+    pub fn column(&self) -> usize {
+        self.1
+    }
 }
 
 impl Add for Position {

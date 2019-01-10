@@ -39,6 +39,10 @@ impl Model {
     pub fn get_rotation_system(&self) -> &RotationSystem {
         &self.settings.rotation_system
     }
+
+    pub fn get_board_num_columns(&self) -> usize {
+        self.board_gravity_pair.board().get_num_columns()
+    }
 }
 
 impl Model {
