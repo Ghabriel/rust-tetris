@@ -2,7 +2,7 @@ use super::super::super::piece::{Piece, PieceColor};
 use super::super::super::rotations::RotationSystem;
 use super::super::super::settings::Settings;
 use super::super::{Block, Board};
-use super::super::helpers::to_board_coordinates;
+use super::super::helpers::piece_to_board_coordinates;
 use super::row_iterator::RowIterator;
 
 pub struct SimpleBoard {
@@ -72,7 +72,7 @@ impl SimpleBoard {
         position: usize,
         rotation_system: &'a RotationSystem
     ) -> impl Iterator<Item = usize> + 'a {
-        to_board_coordinates(
+        piece_to_board_coordinates(
             self.get_num_columns(),
             piece,
             position,

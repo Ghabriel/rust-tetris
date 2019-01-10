@@ -1,7 +1,8 @@
 use super::super::super::piece::Piece;
+use super::super::super::position::Position;
 use super::super::super::rotations::RotationSystem;
 
-pub fn to_board_coordinates<'a>(
+pub fn piece_to_board_coordinates<'a>(
     board_num_columns: usize,
     piece: &'a Piece,
     position: usize,
@@ -14,32 +15,23 @@ pub fn to_board_coordinates<'a>(
         .enumerate()
         .filter(|(_, cell)| **cell)
         .map(move |(cell_index, _)| {
-            let (row, column) = piece_to_board_coordinates(
+            piece_cell_to_board_coordinates(
                 board_num_columns,
                 cell_index,
                 grid_num_columns,
                 position
-            );
-
-            row * board_num_columns + column
+            ).to_index(board_num_columns)
         })
 }
 
-pub fn piece_to_board_coordinates(
+pub fn piece_cell_to_board_coordinates(
     board_num_columns: usize,
     piece_cell_index: usize,
     piece_grid_num_columns: usize,
     piece_position: usize
-) -> (usize, usize) {
-    let grid_in_board_coordinates = index_to_coordinates(piece_position, board_num_columns);
-    let cell_in_grid_coordinates = index_to_coordinates(piece_cell_index, piece_grid_num_columns);
+) -> Position {
+    let grid_in_board_coordinates = Position::from_index(piece_position, board_num_columns);
+    let cell_in_grid_coordinates = Position::from_index(piece_cell_index, piece_grid_num_columns);
 
-    (
-        cell_in_grid_coordinates.0 + grid_in_board_coordinates.0,
-        cell_in_grid_coordinates.1 + grid_in_board_coordinates.1,
-    )
-}
-
-pub fn index_to_coordinates(index: usize, num_columns: usize) -> (usize, usize) {
-    (index / num_columns, index % num_columns)
+    cell_in_grid_coordinates + grid_in_board_coordinates
 }
