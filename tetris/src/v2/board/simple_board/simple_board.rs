@@ -2,6 +2,7 @@ use super::super::super::piece::{Piece, PieceColor};
 use super::super::super::rotations::RotationSystem;
 use super::super::super::settings::Settings;
 use super::super::{Block, Board};
+use super::super::helpers::to_board_coordinates;
 use super::row_iterator::RowIterator;
 
 pub struct SimpleBoard {
@@ -71,29 +72,12 @@ impl SimpleBoard {
         position: usize,
         rotation_system: &'a RotationSystem
     ) -> impl Iterator<Item = usize> + 'a {
-        let grid = piece.get_grid(rotation_system);
-        let grid_num_columns = (grid.0.len() as f64).sqrt() as usize;
-        let board_num_columns = self.get_num_columns();
-
-        grid.0.iter()
-            .enumerate()
-            .filter(|(_, cell)| **cell)
-            .map(move |(index, _)| {
-                // the grid position, in board coordinates: pos(grid, board)
-                let base_row = position / board_num_columns;
-                let base_column = position % board_num_columns;
-
-                // the cell position, in grid coordinates: pos(cell, grid)
-                let cell_grid_row = index / grid_num_columns;
-                let cell_grid_column = index % grid_num_columns;
-
-                // the cell position, in board coordinates:
-                // pos(cell, board) = pos(cell, grid) + pos(grid, board)
-                let row = base_row + cell_grid_row;
-                let column = base_column + cell_grid_column;
-
-                row * board_num_columns + column
-            })
+        to_board_coordinates(
+            self.get_num_columns(),
+            piece,
+            position,
+            rotation_system
+        )
     }
 }
 

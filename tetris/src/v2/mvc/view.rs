@@ -120,8 +120,20 @@ impl View {
             .enumerate()
             .filter(|(_, cell)| **cell)
             .for_each(|(index, _)| {
-                // TODO
+                let row = index / grid_num_columns;
+                let column = index % grid_num_columns;
+
+                self.render_block((row, column), position, rotation_system);
             });
+    }
+
+    pub fn render_block(
+        &mut self,
+        (grid_row, grid_column): (usize, usize),
+        grid_position: usize,
+        rotation_system: &RotationSystem
+    ) {
+        // TODO
     }
 }
 
