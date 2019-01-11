@@ -66,19 +66,19 @@ impl SimpleBoard {
 }
 
 impl SimpleBoard {
-    fn to_board_coordinates<'a>(
-        &self,
-        piece: &'a Piece,
-        position: usize,
-        rotation_system: &'a RotationSystem
-    ) -> impl Iterator<Item = usize> + 'a {
-        helpers::piece_to_board_coordinates(
-            self.get_num_columns(),
-            piece,
-            position,
-            rotation_system
-        )
-    }
+    // fn to_board_coordinates<'a>(
+    //     &self,
+    //     piece: &'a Piece,
+    //     position: usize,
+    //     rotation_system: &'a RotationSystem
+    // ) -> impl Iterator<Item = usize> + 'a {
+    //     helpers::piece_to_board_coordinates(
+    //         self.get_num_columns(),
+    //         piece,
+    //         position,
+    //         rotation_system
+    //     )
+    // }
 }
 
 impl Board for SimpleBoard {
@@ -99,17 +99,18 @@ impl Board for SimpleBoard {
     fn materialize(&mut self, piece: Piece, position: usize, settings: &Settings) {
         let piece_color = piece.get_color();
 
-        self.to_board_coordinates(&piece, position, &settings.rotation_system)
-            .for_each(|index| {
-                let board_cell = &mut self.grid[index];
+        // TODO
+        // self.to_board_coordinates(&piece, position, &settings.rotation_system)
+        //     .for_each(|index| {
+        //         let board_cell = &mut self.grid[index];
 
-                match board_cell {
-                    Some(_) => panic!("Cell clash during materialization"),
-                    None => *board_cell = Some(Block {
-                        color: (*piece_color).clone()
-                    }),
-                }
-            });
+        //         match board_cell {
+        //             Some(_) => panic!("Cell clash during materialization"),
+        //             None => *board_cell = Some(Block {
+        //                 color: (*piece_color).clone()
+        //             }),
+        //         }
+        //     });
     }
 
     fn get_filled_rows(&self) -> Vec<usize> {
