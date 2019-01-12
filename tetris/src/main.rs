@@ -1,5 +1,5 @@
 use tetris::gravity::Gravity;
-use tetris::mvc::{GameLoop, Model, View};
+use tetris::mvc::{GameLoop, GameRenderer, Model};
 use tetris::rotations;
 use tetris::settings::Settings;
 
@@ -22,9 +22,9 @@ fn main() {
     };
 
     let model = Model::new(settings);
-    let view = View::new(800, 600, "Tetris");
+    let renderer = GameRenderer::new(800, 600, "Tetris");
 
-    let mut game_loop = GameLoop::new(model, view);
+    let mut game_loop = GameLoop::new(model, renderer);
 
     game_loop.start();
 }

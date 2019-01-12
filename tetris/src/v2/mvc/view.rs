@@ -1,12 +1,10 @@
 use sfml::graphics::{IntRect, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
 use sfml::window::{Event, Style};
-use super::super::board::helpers;
 use super::super::piece::{Piece, PieceColor};
 use super::super::position::{BoardPosition, PiecePosition, WindowPosition};
 use super::super::rotations::RotationSystem;
 use super::model::CurrentPiece;
-use super::Model;
-use super::traits::Render;
+use super::{GameAssets, Model};
 
 const TILE_SIZE: usize = 18;
 const TILE_SCALING: f32 = 1.5;
@@ -14,26 +12,6 @@ const TILE_SCALING: f32 = 1.5;
 pub struct View {
     window: RenderWindow,
     board_view_position: WindowPosition,
-    tiles_texture: Texture,
-}
-
-impl Render for View {
-    type Target = Model;
-
-    fn render(&mut self, model: &Model) -> bool {
-        if self.handle_events() {
-            return true;
-        }
-
-        self.window.set_active(true);
-
-        self.render_board(model);
-        self.render_active_piece(model);
-
-        self.window.display();
-
-        false
-    }
 }
 
 impl View {
@@ -51,13 +29,25 @@ impl View {
 
         let board_view_position = WindowPosition::new(100., 20.);
 
-        let tiles_texture = Texture::from_file("resources/tiles.png").unwrap();
-
         View {
             window,
             board_view_position,
-            tiles_texture,
         }
+    }
+
+    pub fn render(&mut self, model: &Model, assets: &mut GameAssets) -> bool {
+        if self.handle_events() {
+            return true;
+        }
+
+        self.window.set_active(true);
+
+        self.render_board(model, assets);
+        self.render_active_piece(model, assets);
+
+        self.window.display();
+
+        false
     }
 
     pub fn handle_events(&mut self) -> bool {
@@ -71,8 +61,8 @@ impl View {
         false
     }
 
-    pub fn render_board(&mut self, model: &Model) {
-        let mut tile_sprite = make_tile_sprite(&self.tiles_texture);
+    pub fn render_board(&mut self, model: &Model, assets: &mut GameAssets) {
+        let mut tile_sprite = make_tile_sprite(assets);
         let mut row_index = 0;
 
         model.for_each_row(&mut |row| {
@@ -93,7 +83,7 @@ impl View {
         });
     }
 
-    pub fn render_active_piece(&mut self, model: &Model) {
+    pub fn render_active_piece(&mut self, model: &Model, assets: &mut GameAssets) {
         if let Some(active_piece) = model.get_active_piece() {
             let CurrentPiece { piece, position } = active_piece;
             let piece_position = BoardPosition::from_index(
@@ -101,7 +91,7 @@ impl View {
                 model.get_board_num_columns()
             );
 
-            self.render_piece(model, piece, &piece_position);
+            self.render_piece(model, piece, &piece_position, assets);
         }
     }
 
@@ -110,12 +100,13 @@ impl View {
         model: &Model,
         piece: &Piece,
         piece_position: &BoardPosition,
+        assets: &mut GameAssets,
     ) {
         let piece_color = piece.get_color();
         let grid = piece.get_grid(model.get_rotation_system());
         let grid_size = grid.0.len();
         let grid_num_columns = (grid_size as f32).sqrt() as usize;
-        let mut tile_sprite = make_tile_sprite(&self.tiles_texture);
+        let mut tile_sprite = make_tile_sprite(assets);
 
         grid.0.iter()
             .enumerate()
@@ -154,8 +145,8 @@ impl View {
     }
 }
 
-fn make_tile_sprite(tile_texture: &Texture) -> Sprite {
-    let mut tile_sprite = Sprite::with_texture(tile_texture);
+fn make_tile_sprite(assets: &GameAssets) -> Sprite {
+    let mut tile_sprite = assets.make_tile_sprite();
     tile_sprite.scale((TILE_SCALING, TILE_SCALING));
 
     tile_sprite

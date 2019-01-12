@@ -1,6 +1,5 @@
 mod board;
 mod block;
-pub mod helpers;
 pub mod simple_board;
 
 #[cfg(test)]
