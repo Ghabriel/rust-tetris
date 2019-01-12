@@ -128,7 +128,7 @@ impl Model {
         for tile_position in self.get_active_piece_iterator() {
             let tile_below = tile_position + &next_row_offset;
 
-            if self.is_occupied(&tile_below) {
+            if self.is_below_floor(&tile_below) || self.is_occupied(&tile_below) {
                 return true;
             }
         }
@@ -144,6 +144,12 @@ impl Model {
 
     fn is_occupied(&self, position: &BoardPosition) -> bool {
         self.board_gravity_pair.board().is_occupied(position)
+    }
+
+    fn is_below_floor(&self, position: &BoardPosition) -> bool {
+        let num_rows = self.board_gravity_pair.board().get_num_rows();
+
+        position.get_row() >= num_rows
     }
 }
 
@@ -166,6 +172,17 @@ impl Model {
         let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
         self.board_gravity_pair.board_mut().materialize(piece, position, &self.settings);
         self.current_piece = None;
+    }
+}
+
+/**
+ * clear_filled_rows implementation
+ */
+impl Model {
+    fn clear_filled_rows(&mut self) {
+        let filled_rows = self.board_gravity_pair.board().get_filled_rows();
+
+        self.board_gravity_pair.clear_rows(&filled_rows, &self.settings);
     }
 }
 

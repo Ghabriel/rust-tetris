@@ -26,7 +26,7 @@ impl View {
             &Default::default()
         );
 
-        let board_view_position = WindowPosition::new(100., 20.);
+        let board_view_position = WindowPosition::new(20., 10.);
 
         View {
             window,
