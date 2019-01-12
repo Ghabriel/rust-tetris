@@ -2,6 +2,7 @@ use super::super::board::{Block, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::{Piece, PieceColor, PieceKind};
+use super::super::position::{BoardPosition, PiecePosition};
 use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
 use super::traits::Tick;
@@ -76,30 +77,90 @@ impl Model {
             &self.settings.board_size
         );
     }
+}
 
-    pub fn has_active_piece(&self) -> bool {
+/**
+ * has_active_piece implementation + helpers
+ */
+impl Model {
+    fn has_active_piece(&self) -> bool {
         self.current_piece.is_some()
     }
+}
 
-    pub fn spawn_piece(&mut self) {
+/**
+ * spawn_piece implementation + helpers
+ */
+impl Model {
+    fn spawn_piece(&mut self) {
         let piece = random_piece();
         let position = self.get_centralized_position_for(&piece);
 
         self.current_piece = Some(CurrentPiece { piece, position });
     }
 
-    pub fn get_centralized_position_for(&self, piece: &Piece) -> usize {
+    fn get_centralized_position_for(&self, piece: &Piece) -> usize {
         let grid_num_columns = self.get_grid_num_columns(piece);
         let board_num_columns = self.get_board_num_columns();
 
         (board_num_columns - grid_num_columns) / 2
     }
 
-    pub fn get_grid_num_columns(&self, piece: &Piece) -> usize {
+    fn get_grid_num_columns(&self, piece: &Piece) -> usize {
         let grid = piece.get_grid(self.get_rotation_system());
         let grid_size = grid.0.len();
 
         (grid_size as f32).sqrt() as usize
+    }
+}
+
+/**
+ * active_piece_touches_board implementation + helpers
+ */
+impl Model {
+    fn active_piece_touches_board(&self) -> bool {
+        let next_row_offset = BoardPosition::new(1, 0);
+
+        for tile_position in self.get_active_piece_iterator() {
+            let next_row = tile_position + &next_row_offset;
+
+            if self.is_occupied(&next_row) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
+        let CurrentPiece { piece, position } = self.current_piece.unwrap();
+        let piece_position = BoardPosition::from_index(
+            position,
+            self.get_board_num_columns()
+        );
+
+        let grid = piece.get_grid(self.get_rotation_system());
+        let grid_size = grid.0.len();
+        let grid_num_columns = (grid_size as f32).sqrt() as usize;
+
+        grid.0.iter()
+            .enumerate()
+            .filter(|(_, tile)| **tile)
+            .map(|(tile_index, _)| {
+                let block_in_piece_coordinates = PiecePosition::from_index(
+                    tile_index,
+                    grid_num_columns
+                );
+
+                BoardPosition::new(
+                    block_in_piece_coordinates.get_row() + piece_position.get_row(),
+                    block_in_piece_coordinates.get_column() + piece_position.get_column(),
+                )
+            })
+    }
+
+    fn is_occupied(&self, position: &BoardPosition) -> bool {
+        self.board_gravity_pair.board().is_occupied(position)
     }
 }
 

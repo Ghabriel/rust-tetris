@@ -1,4 +1,5 @@
 use super::super::piece::Piece;
+use super::super::position::BoardPosition;
 use super::super::settings::Settings;
 use super::Block;
 
@@ -8,7 +9,7 @@ pub trait Board {
      */
     fn get_num_columns(&self) -> usize;
     fn get_num_rows(&self) -> usize;
-    fn is_occupied(&self, row: usize, column: usize) -> bool;
+    fn is_occupied(&self, position: &BoardPosition) -> bool;
     fn materialize(&mut self, piece: Piece, position: usize, settings: &Settings);
     fn get_filled_rows(&self) -> Vec<usize>;
     fn clear_rows(&mut self, rows: &[usize], settings: &Settings);

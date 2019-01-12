@@ -1,4 +1,5 @@
 use super::super::super::piece::{Piece, PieceColor};
+use super::super::super::position::BoardPosition;
 use super::super::super::rotations::RotationSystem;
 use super::super::super::settings::Settings;
 use super::super::{Block, Board};
@@ -89,8 +90,8 @@ impl Board for SimpleBoard {
         self.grid.len() / self.num_columns
     }
 
-    fn is_occupied(&self, row: usize, column: usize) -> bool {
-        let index = row * self.num_columns + column;
+    fn is_occupied(&self, position: &BoardPosition) -> bool {
+        let index = position.to_index(self.num_columns);
 
         self.grid[index].is_some()
     }
