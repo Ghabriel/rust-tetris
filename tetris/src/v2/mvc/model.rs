@@ -39,35 +39,67 @@ impl Model {
     pub fn get_board_num_columns(&self) -> usize {
         self.board_gravity_pair.board().get_num_columns()
     }
+
+    pub fn is_running(&self) -> bool {
+        self.running
+    }
 }
 
-impl Tick for Model {
-    fn tick(&mut self, elapsed_time: f64) -> bool {
-        if !self.running {
-            return false;
-        }
+impl Model {
+    fn stop_if_not_running(&mut self) -> bool {
+        self.running
+    }
 
+    fn spawn_piece_if_needed(&mut self) -> bool {
         if !self.has_active_piece() {
             self.spawn_piece();
             return false;
         }
 
-        // TODO: add an artificial delay to make the game easier
+        true
+    }
 
+    fn lower_active_piece_if_possible(&mut self) -> bool {
         if !self.active_piece_touches_board() {
             self.lower_active_piece();
             return false;
         }
 
+        true
+    }
+
+    fn materialization_process(&mut self) -> bool {
         match self.materialize_active_piece() {
             MaterializationStatus::Success => {},
             MaterializationStatus::Failure => {
                 self.running = false;
-                return false
+                return false;
             }
         }
 
         self.clear_filled_rows();
+        true
+    }
+
+    fn run_until_false(&mut self, steps: &[fn(&mut Self) -> bool]) {
+        for step in steps.iter() {
+            if !step(self) {
+                break;
+            }
+        }
+    }
+}
+
+impl Tick for Model {
+    fn tick(&mut self, elapsed_time: f64) -> bool {
+        // TODO: add an artificial delay to make the game easier
+
+        self.run_until_false(&[
+            Model::stop_if_not_running,
+            Model::spawn_piece_if_needed,
+            Model::lower_active_piece_if_possible,
+            Model::materialization_process
+        ]);
 
         false
     }
