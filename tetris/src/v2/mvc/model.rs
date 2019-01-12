@@ -1,7 +1,7 @@
 use super::super::board::{Block, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
-use super::super::piece::Piece;
+use super::super::piece::{Piece, PieceColor, PieceKind};
 use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
 use super::traits::Tick;
@@ -15,13 +15,6 @@ pub struct Model {
 pub struct CurrentPiece {
     pub piece: Piece,
     pub position: usize,
-}
-
-impl Tick for Model {
-    fn tick(&mut self, elapsed_time: f64) -> bool {
-        // TODO
-        false
-    }
 }
 
 /**
@@ -45,6 +38,27 @@ impl Model {
     }
 }
 
+impl Tick for Model {
+    fn tick(&mut self, elapsed_time: f64) -> bool {
+        if !self.has_active_piece() {
+            self.spawn_piece();
+            return false;
+        }
+
+        // TODO: add an artificial delay to make the game easier
+
+        if !self.active_piece_touches_board() {
+            self.lower_active_piece();
+            return false;
+        }
+
+        self.materialize_active_piece();
+        self.clear_filled_rows();
+
+        false
+    }
+}
+
 impl Model {
     pub fn new(settings: Settings) -> Model {
         Model {
@@ -63,25 +77,30 @@ impl Model {
         );
     }
 
-//     pub fn has_active_piece(&self) -> bool {
-//         self.current_piece.is_some()
-//     }
+    pub fn has_active_piece(&self) -> bool {
+        self.current_piece.is_some()
+    }
 
-//     // pub fn active_piece_touches_board
+    pub fn spawn_piece(&mut self) {
+        let piece = random_piece();
+        let position = self.get_centralized_position_for(&piece);
 
-//     pub fn tick(&mut self, settings: &Settings) {
-//         if !self.has_active_piece() {
-//             return;
-//         }
+        self.current_piece = Some(CurrentPiece { piece, position });
+    }
 
-//         if !self.active_piece_touches_board(settings) {
-//             self.lower_active_piece();
-//             return;
-//         }
+    pub fn get_centralized_position_for(&self, piece: &Piece) -> usize {
+        let grid_num_columns = self.get_grid_num_columns(piece);
+        let board_num_columns = self.get_board_num_columns();
 
-//         self.materialize_active_piece(settings);
-//         self.clear_filled_rows(settings);
-//     }
+        (board_num_columns - grid_num_columns) / 2
+    }
+
+    pub fn get_grid_num_columns(&self, piece: &Piece) -> usize {
+        let grid = piece.get_grid(self.get_rotation_system());
+        let grid_size = grid.0.len();
+
+        (grid_size as f32).sqrt() as usize
+    }
 }
 
 fn get_boxed_gravity(
@@ -99,4 +118,9 @@ fn get_boxed_gravity(
             )
         }
     }
+}
+
+fn random_piece() -> Piece {
+    // TODO
+    Piece::new(PieceKind::L, PieceColor::Blue, 0)
 }
