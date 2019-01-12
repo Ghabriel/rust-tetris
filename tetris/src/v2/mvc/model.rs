@@ -1,4 +1,4 @@
-use super::super::board::{Block, SimpleBoard};
+use super::super::board::{Block, MaterializationStatus, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::helpers;
@@ -12,6 +12,7 @@ pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     current_piece: Option<CurrentPiece>,
     settings: Settings,
+    running: bool,
 }
 
 pub struct CurrentPiece {
@@ -42,6 +43,10 @@ impl Model {
 
 impl Tick for Model {
     fn tick(&mut self, elapsed_time: f64) -> bool {
+        if !self.running {
+            return false;
+        }
+
         if !self.has_active_piece() {
             self.spawn_piece();
             return false;
@@ -54,7 +59,14 @@ impl Tick for Model {
             return false;
         }
 
-        self.materialize_active_piece();
+        match self.materialize_active_piece() {
+            MaterializationStatus::Success => {},
+            MaterializationStatus::Failure => {
+                self.running = false;
+                return false
+            }
+        }
+
         self.clear_filled_rows();
 
         false
@@ -67,6 +79,7 @@ impl Model {
             board_gravity_pair: get_boxed_gravity(&settings.gravity, &settings.board_size),
             current_piece: None,
             settings: settings,
+            running: true, // TODO: change to false later
         }
     }
 
@@ -168,10 +181,14 @@ impl Model {
  * materialize_active_piece implementation
  */
 impl Model {
-    fn materialize_active_piece(&mut self) {
-        let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
-        self.board_gravity_pair.board_mut().materialize(piece, position, &self.settings);
-        self.current_piece = None;
+    fn materialize_active_piece(&mut self) -> MaterializationStatus {
+        let CurrentPiece { piece, position } = self.current_piece.take().unwrap();
+
+        self.board_gravity_pair.board_mut().materialize(
+            &piece,
+            &position,
+            &self.settings.rotation_system,
+        )
     }
 }
 

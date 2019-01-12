@@ -1,8 +1,9 @@
 use super::super::super::helpers;
 use super::super::super::piece::{Piece, PieceColor};
 use super::super::super::position::BoardPosition;
+use super::super::super::rotations::RotationSystem;
 use super::super::super::settings::Settings;
-use super::super::{Block, Board};
+use super::super::{Block, Board, MaterializationStatus};
 use super::row_iterator::RowIterator;
 
 pub struct SimpleBoard {
@@ -63,22 +64,18 @@ impl SimpleBoard {
     pub fn rows<'a>(&'a self) -> RowIterator<'a> {
         RowIterator::new(self)
     }
-}
 
-impl SimpleBoard {
-    // fn to_board_coordinates<'a>(
-    //     &self,
-    //     piece: &'a Piece,
-    //     position: usize,
-    //     rotation_system: &'a RotationSystem
-    // ) -> impl Iterator<Item = usize> + 'a {
-    //     helpers::piece_to_board_coordinates(
-    //         self.get_num_columns(),
-    //         piece,
-    //         position,
-    //         rotation_system
-    //     )
-    // }
+    fn at(&self, position: &BoardPosition) -> &Option<Block> {
+        let index = position.to_index(self.get_num_columns());
+
+        &self.grid[index]
+    }
+
+    fn at_mut(&mut self, position: &BoardPosition) -> &mut Option<Block> {
+        let index = position.to_index(self.get_num_columns());
+
+        &mut self.grid[index]
+    }
 }
 
 impl Board for SimpleBoard {
@@ -91,31 +88,28 @@ impl Board for SimpleBoard {
     }
 
     fn is_occupied(&self, position: &BoardPosition) -> bool {
-        let index = position.to_index(self.num_columns);
-
-        self.grid[index].is_some()
+        self.at(position).is_some()
     }
 
-    fn materialize(&mut self, piece: &Piece, position: &BoardPosition, settings: &Settings) {
-        let piece_iterator = helpers::get_piece_iterator(
-            piece,
-            position,
-            &settings.rotation_system
-        );
-
+    fn materialize(
+        &mut self,
+        piece: &Piece,
+        position: &BoardPosition,
+        rotation_system: &RotationSystem
+    ) -> MaterializationStatus {
+        let piece_iterator = helpers::get_piece_iterator(piece, position, &rotation_system);
         let piece_color = piece.get_color();
 
         for tile_position in piece_iterator {
-            let tile_index = tile_position.to_index(self.get_num_columns());
-            let board_tile = &mut self.grid[tile_index];
+            let board_tile = self.at_mut(&tile_position);
 
             match board_tile {
-                Some(_) => panic!("tile clash during materialization"),
-                None => *board_tile = Some(Block {
-                    color: (*piece_color).clone()
-                }),
+                Some(_) => return MaterializationStatus::Failure,
+                None => *board_tile = Some(Block { color: (*piece_color).clone() }),
             }
         }
+
+        MaterializationStatus::Success
     }
 
     fn get_filled_rows(&self) -> Vec<usize> {

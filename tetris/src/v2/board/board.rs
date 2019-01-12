@@ -1,7 +1,8 @@
 use super::super::piece::Piece;
 use super::super::position::BoardPosition;
+use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
-use super::Block;
+use super::{Block, MaterializationStatus};
 
 pub trait Board {
     /**
@@ -10,7 +11,12 @@ pub trait Board {
     fn get_num_columns(&self) -> usize;
     fn get_num_rows(&self) -> usize;
     fn is_occupied(&self, position: &BoardPosition) -> bool;
-    fn materialize(&mut self, piece: &Piece, position: &BoardPosition, settings: &Settings);
+    fn materialize(
+        &mut self,
+        piece: &Piece,
+        position: &BoardPosition,
+        rotation_system: &RotationSystem
+    ) -> MaterializationStatus;
     fn get_filled_rows(&self) -> Vec<usize>;
     fn clear_rows(&mut self, rows: &[usize], settings: &Settings);
 
