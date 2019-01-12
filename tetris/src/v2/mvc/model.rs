@@ -1,6 +1,7 @@
 use super::super::board::{Block, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
+use super::super::helpers;
 use super::super::piece::{Piece, PieceColor, PieceKind};
 use super::super::position::{BoardPosition, PiecePosition};
 use super::super::rotations::RotationSystem;
@@ -13,6 +14,7 @@ pub struct Model {
     settings: Settings,
 }
 
+// TODO: store the already-normalized position instead
 pub struct CurrentPiece {
     pub piece: Piece,
     pub position: usize,
@@ -140,32 +142,7 @@ impl Model {
             self.get_board_num_columns()
         );
 
-        self.get_piece_iterator(piece, &piece_position)
-    }
-
-    fn get_piece_iterator<'a>(
-        &'a self,
-        piece: &Piece,
-        piece_position: &'a BoardPosition
-    ) -> impl Iterator<Item = BoardPosition> + 'a {
-        let grid = piece.get_grid(self.get_rotation_system());
-        let grid_size = grid.0.len();
-        let grid_num_columns = (grid_size as f32).sqrt() as usize;
-
-        grid.0.iter()
-            .enumerate()
-            .filter(|(_, tile)| **tile)
-            .map(|(tile_index, _)| {
-                let block_in_piece_coordinates = PiecePosition::from_index(
-                    tile_index,
-                    grid_num_columns
-                );
-
-                BoardPosition::new(
-                    block_in_piece_coordinates.get_row() + piece_position.get_row(),
-                    block_in_piece_coordinates.get_column() + piece_position.get_column(),
-                )
-            })
+        helpers::get_piece_iterator(piece, &piece_position, self.get_rotation_system())
     }
 
     fn is_occupied(&self, position: &BoardPosition) -> bool {
@@ -180,6 +157,24 @@ impl Model {
     fn lower_active_piece(&mut self) {
         let current_piece = self.current_piece.as_mut().unwrap();
         current_piece.position += self.get_board_num_columns();
+    }
+}
+
+/**
+ * materialize_active_piece implementation
+ */
+impl Model {
+    fn materialize_active_piece(&mut self) {
+        let CurrentPiece { piece, position } = self.current_piece.unwrap();
+        self.current_piece = None;
+
+        // TODO: remove redundancy (see get_active_piece_iterator)
+        let piece_position = BoardPosition::from_index(
+            position,
+            self.get_board_num_columns()
+        );
+
+        self.board_gravity_pair.board().materialize(&piece, &piece_position, &self.settings);
     }
 }
 

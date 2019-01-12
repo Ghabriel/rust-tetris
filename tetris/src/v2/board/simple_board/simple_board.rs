@@ -1,3 +1,4 @@
+use super::super::super::helpers;
 use super::super::super::piece::{Piece, PieceColor};
 use super::super::super::position::BoardPosition;
 use super::super::super::rotations::RotationSystem;
@@ -96,21 +97,26 @@ impl Board for SimpleBoard {
         self.grid[index].is_some()
     }
 
-    fn materialize(&mut self, piece: Piece, position: usize, settings: &Settings) {
+    fn materialize(&mut self, piece: &Piece, position: &BoardPosition, settings: &Settings) {
+        let piece_iterator = helpers::get_piece_iterator(
+            piece,
+            position,
+            &settings.rotation_system
+        );
+
         let piece_color = piece.get_color();
 
-        // TODO
-        // self.to_board_coordinates(&piece, position, &settings.rotation_system)
-        //     .for_each(|index| {
-        //         let board_tile = &mut self.grid[index];
+        for tile_position in piece_iterator {
+            let tile_index = tile_position.to_index(self.get_num_columns());
+            let board_tile = &mut self.grid[tile_index];
 
-        //         match board_tile {
-        //             Some(_) => panic!("tile clash during materialization"),
-        //             None => *board_tile = Some(Block {
-        //                 color: (*piece_color).clone()
-        //             }),
-        //         }
-        //     });
+            match board_tile {
+                Some(_) => panic!("tile clash during materialization"),
+                None => *board_tile = Some(Block {
+                    color: (*piece_color).clone()
+                }),
+            }
+        }
     }
 
     fn get_filled_rows(&self) -> Vec<usize> {
