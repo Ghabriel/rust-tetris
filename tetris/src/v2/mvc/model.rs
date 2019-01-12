@@ -3,7 +3,7 @@ use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::helpers;
 use super::super::piece::{Piece, PieceColor, PieceKind};
-use super::super::position::{BoardPosition, PiecePosition};
+use super::super::position::BoardPosition;
 use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
 use super::traits::Tick;

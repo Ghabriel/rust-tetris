@@ -1,8 +1,7 @@
-use sfml::graphics::{IntRect, RenderTarget, RenderWindow, Sprite, Texture, Transformable};
+use sfml::graphics::{IntRect, RenderTarget, RenderWindow, Sprite, Transformable};
 use sfml::window::{Event, Style};
-use super::super::piece::{Piece, PieceColor};
+use super::super::piece::Piece;
 use super::super::position::{BoardPosition, PiecePosition, WindowPosition};
-use super::super::rotations::RotationSystem;
 use super::model::CurrentPiece;
 use super::{GameAssets, Model};
 

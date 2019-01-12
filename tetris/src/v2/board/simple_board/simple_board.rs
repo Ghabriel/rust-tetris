@@ -1,7 +1,6 @@
 use super::super::super::helpers;
 use super::super::super::piece::{Piece, PieceColor};
 use super::super::super::position::BoardPosition;
-use super::super::super::rotations::RotationSystem;
 use super::super::super::settings::Settings;
 use super::super::{Block, Board};
 use super::row_iterator::RowIterator;
