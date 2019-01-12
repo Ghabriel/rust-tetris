@@ -1,4 +1,4 @@
-use sfml::graphics::{IntRect, RenderTarget, RenderWindow, Sprite, Transformable};
+use sfml::graphics::{Color, IntRect, RenderTarget, RenderWindow, Sprite, Transformable};
 use sfml::window::{Event, Style};
 use super::super::piece::Piece;
 use super::super::position::{BoardPosition, PiecePosition, WindowPosition};
@@ -39,7 +39,7 @@ impl View {
             return true;
         }
 
-        self.window.set_active(true);
+        self.window.clear(&Color::BLACK);
 
         self.render_board(model, assets);
         self.render_active_piece(model, assets);
