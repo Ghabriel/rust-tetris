@@ -14,10 +14,9 @@ pub struct Model {
     settings: Settings,
 }
 
-// TODO: store the already-normalized position instead
 pub struct CurrentPiece {
     pub piece: Piece,
-    pub position: usize,
+    pub position: BoardPosition,
 }
 
 /**
@@ -101,11 +100,14 @@ impl Model {
         self.current_piece = Some(CurrentPiece { piece, position });
     }
 
-    fn get_centralized_position_for(&self, piece: &Piece) -> usize {
+    fn get_centralized_position_for(&self, piece: &Piece) -> BoardPosition {
         let grid_num_columns = self.get_grid_num_columns(piece);
         let board_num_columns = self.get_board_num_columns();
 
-        (board_num_columns - grid_num_columns) / 2
+        BoardPosition::new(
+            0,
+            (board_num_columns - grid_num_columns) / 2,
+        )
     }
 
     fn get_grid_num_columns(&self, piece: &Piece) -> usize {
@@ -137,12 +139,7 @@ impl Model {
     fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
         let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
 
-        let piece_position = BoardPosition::from_index(
-            *position,
-            self.get_board_num_columns()
-        );
-
-        helpers::get_piece_iterator(piece, &piece_position, self.get_rotation_system())
+        helpers::get_piece_iterator(piece, position, self.get_rotation_system())
     }
 
     fn is_occupied(&self, position: &BoardPosition) -> bool {
@@ -156,7 +153,8 @@ impl Model {
 impl Model {
     fn lower_active_piece(&mut self) {
         let current_piece = self.current_piece.as_mut().unwrap();
-        current_piece.position += self.get_board_num_columns();
+
+        current_piece.position += BoardPosition::new(1, 0);
     }
 }
 
@@ -165,16 +163,10 @@ impl Model {
  */
 impl Model {
     fn materialize_active_piece(&mut self) {
-        let CurrentPiece { piece, position } = self.current_piece.unwrap();
+        let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
         self.current_piece = None;
 
-        // TODO: remove redundancy (see get_active_piece_iterator)
-        let piece_position = BoardPosition::from_index(
-            position,
-            self.get_board_num_columns()
-        );
-
-        self.board_gravity_pair.board().materialize(&piece, &piece_position, &self.settings);
+        self.board_gravity_pair.board().materialize(piece, position, &self.settings);
     }
 }
 

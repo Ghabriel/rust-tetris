@@ -86,12 +86,8 @@ impl View {
     pub fn render_active_piece(&mut self, model: &Model, assets: &mut GameAssets) {
         if let Some(active_piece) = model.get_active_piece() {
             let CurrentPiece { piece, position } = active_piece;
-            let piece_position = BoardPosition::from_index(
-                *position,
-                model.get_board_num_columns()
-            );
 
-            self.render_piece(model, piece, &piece_position, assets);
+            self.render_piece(model, piece, position, assets);
         }
     }
 

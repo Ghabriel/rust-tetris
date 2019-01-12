@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, AddAssign};
 
 // TODO: reduce the redundancy between BoardPosition, PiecePosition and WindowPosition
 
@@ -40,5 +40,12 @@ impl Add<&BoardPosition> for BoardPosition {
             row: self.row + other.row,
             column: self.column + other.column,
         }
+    }
+}
+
+impl AddAssign for BoardPosition {
+    fn add_assign(&mut self, other: BoardPosition) {
+        self.row += other.row;
+        self.column += other.column;
     }
 }
