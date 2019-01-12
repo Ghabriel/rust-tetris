@@ -133,12 +133,21 @@ impl Model {
     }
 
     fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
-        let CurrentPiece { piece, position } = self.current_piece.unwrap();
+        let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
+
         let piece_position = BoardPosition::from_index(
-            position,
+            *position,
             self.get_board_num_columns()
         );
 
+        self.get_piece_iterator(piece, &piece_position)
+    }
+
+    fn get_piece_iterator<'a>(
+        &'a self,
+        piece: &Piece,
+        piece_position: &'a BoardPosition
+    ) -> impl Iterator<Item = BoardPosition> + 'a {
         let grid = piece.get_grid(self.get_rotation_system());
         let grid_size = grid.0.len();
         let grid_num_columns = (grid_size as f32).sqrt() as usize;
