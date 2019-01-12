@@ -28,7 +28,7 @@ impl<'a> Iterator for RowIterator<'a> {
 
         self.next_row += 1;
 
-        Some(self.board.cells()
+        Some(self.board.tiles()
             .skip(next_starting_index)
             .take(num_columns)
             .collect())

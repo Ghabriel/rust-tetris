@@ -55,7 +55,7 @@ impl SimpleBoard {
         self.grid.len()
     }
 
-    pub fn cells(&self) -> impl Iterator<Item = &Option<Block>> {
+    pub fn tiles(&self) -> impl Iterator<Item = &Option<Block>> {
         self.grid.iter()
     }
 
@@ -101,11 +101,11 @@ impl Board for SimpleBoard {
         // TODO
         // self.to_board_coordinates(&piece, position, &settings.rotation_system)
         //     .for_each(|index| {
-        //         let board_cell = &mut self.grid[index];
+        //         let board_tile = &mut self.grid[index];
 
-        //         match board_cell {
-        //             Some(_) => panic!("Cell clash during materialization"),
-        //             None => *board_cell = Some(Block {
+        //         match board_tile {
+        //             Some(_) => panic!("tile clash during materialization"),
+        //             None => *board_tile = Some(Block {
         //                 color: (*piece_color).clone()
         //             }),
         //         }
@@ -116,7 +116,7 @@ impl Board for SimpleBoard {
         self.rows()
             .enumerate()
             .filter(|(_, row)| {
-                row.iter().all(|cell| cell.is_some())
+                row.iter().all(|tile| tile.is_some())
             })
             .map(|(index, _)| index)
             .collect()

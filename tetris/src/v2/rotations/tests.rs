@@ -148,8 +148,8 @@ fn assert_grid_eq(piece: &Piece, rotation_system: &RotationSystem, expected: &st
 fn readable_grid(grid: &PieceGrid) -> String {
     let mut result = String::new();
 
-    for &cell in &grid.0 {
-        result += if cell { "1" } else { "0" };
+    for &tile in &grid.0 {
+        result += if tile { "1" } else { "0" };
     }
 
     result

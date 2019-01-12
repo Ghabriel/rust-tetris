@@ -68,14 +68,14 @@ impl View {
         model.for_each_row(&mut |row| {
             row.iter()
                 .enumerate()
-                .for_each(|(cell_index, cell)| {
-                    if let Some(block) = cell {
+                .for_each(|(tile_index, tile)| {
+                    if let Some(block) = tile {
                         let tileset_coordinates = IntRect::new(0, 0, 18, 18);
                         tile_sprite.set_texture_rect(&tileset_coordinates);
 
-                        let cell_coordinates = BoardPosition::new(row_index, cell_index);
+                        let tile_coordinates = BoardPosition::new(row_index, tile_index);
 
-                        self.draw_tile(&cell_coordinates, &mut tile_sprite);
+                        self.draw_tile(&tile_coordinates, &mut tile_sprite);
                     }
                 });
 
@@ -110,10 +110,10 @@ impl View {
 
         grid.0.iter()
             .enumerate()
-            .filter(|(_, cell)| **cell)
-            .for_each(|(cell_index, _)| {
+            .filter(|(_, tile)| **tile)
+            .for_each(|(tile_index, _)| {
                 let block_in_piece_coordinates = PiecePosition::from_index(
-                    cell_index,
+                    tile_index,
                     grid_num_columns
                 );
 
