@@ -80,7 +80,7 @@ impl Model {
 }
 
 /**
- * has_active_piece implementation + helpers
+ * has_active_piece implementation
  */
 impl Model {
     fn has_active_piece(&self) -> bool {
@@ -170,6 +170,16 @@ impl Model {
 
     fn is_occupied(&self, position: &BoardPosition) -> bool {
         self.board_gravity_pair.board().is_occupied(position)
+    }
+}
+
+/**
+ * lower_active_piece implementation
+ */
+impl Model {
+    fn lower_active_piece(&mut self) {
+        let current_piece = self.current_piece.as_mut().unwrap();
+        current_piece.position += self.get_board_num_columns();
     }
 }
 
