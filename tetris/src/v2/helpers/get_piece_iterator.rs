@@ -14,7 +14,7 @@ pub fn get_piece_iterator<'a>(
     grid.0.iter()
         .enumerate()
         .filter(|(_, tile)| **tile)
-        .map(|(tile_index, _)| {
+        .map(move |(tile_index, _)| {
             let block_in_piece_coordinates = PiecePosition::from_index(
                 tile_index,
                 grid_num_columns

@@ -164,9 +164,8 @@ impl Model {
 impl Model {
     fn materialize_active_piece(&mut self) {
         let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
+        self.board_gravity_pair.board_mut().materialize(piece, position, &self.settings);
         self.current_piece = None;
-
-        self.board_gravity_pair.board().materialize(piece, position, &self.settings);
     }
 }
 
