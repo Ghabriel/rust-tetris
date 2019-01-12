@@ -122,9 +122,9 @@ impl Model {
         let next_row_offset = BoardPosition::new(1, 0);
 
         for tile_position in self.get_active_piece_iterator() {
-            let next_row = tile_position + &next_row_offset;
+            let tile_below = tile_position + &next_row_offset;
 
-            if self.is_occupied(&next_row) {
+            if self.is_occupied(&tile_below) {
                 return true;
             }
         }
