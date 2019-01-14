@@ -39,83 +39,37 @@ impl Model {
     pub fn get_board_num_columns(&self) -> usize {
         self.board_gravity_pair.board().get_num_columns()
     }
-
-    pub fn is_running(&self) -> bool {
-        self.running
-    }
 }
 
-enum StepOutcome<T> {
-    Continue,
-    Return(T),
-}
-
-impl Model {
-    fn stop_if_not_running(&mut self) -> StepOutcome<bool> {
-        match self.running {
-            true => StepOutcome::Continue,
-            false => StepOutcome::Return(false),
+impl Tick for Model {
+    fn tick(&mut self, elapsed_time: f64) -> bool {
+        if !self.running {
+            return false;
         }
-    }
 
-    fn spawn_piece_if_needed(&mut self) -> StepOutcome<bool> {
         if !self.has_active_piece() {
             self.spawn_piece();
-            return StepOutcome::Return(false);
+            return false;
         }
 
-        StepOutcome::Continue
-    }
+        // TODO: add an artificial delay to make the game easier
 
-    fn lower_active_piece_if_possible(&mut self) -> StepOutcome<bool> {
         if !self.active_piece_touches_board() {
             self.lower_active_piece();
-            return StepOutcome::Return(false);
+            return false;
         }
 
-        StepOutcome::Continue
-    }
-
-    fn materialization_process(&mut self) -> StepOutcome<bool> {
         match self.materialize_active_piece() {
             MaterializationStatus::Success => {},
             MaterializationStatus::Failure => {
                 self.running = false;
-                return StepOutcome::Return(false);
+                return false
             }
         }
 
         self.clear_filled_rows();
 
-        StepOutcome::Continue
-    }
-
-    fn run_steps<T>(
-        &mut self,
-        steps: &[fn(&mut Self) -> StepOutcome<T>],
-        default_return: T,
-    ) -> T {
-        for step in steps.iter() {
-            match step(self) {
-                StepOutcome::Continue => {},
-                StepOutcome::Return(value) => return value,
-            }
-        }
-
-        default_return
-    }
-}
-
-impl Tick for Model {
-    fn tick(&mut self, elapsed_time: f64) -> bool {
-        // TODO: add an artificial delay to make the game easier
-
-        self.run_steps(&[
-            Model::stop_if_not_running,
-            Model::spawn_piece_if_needed,
-            Model::lower_active_piece_if_possible,
-            Model::materialization_process
-        ], false)
+        false
     }
 }
 
