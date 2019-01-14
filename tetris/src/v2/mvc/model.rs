@@ -222,5 +222,5 @@ fn get_boxed_gravity(
 
 fn random_piece() -> Piece {
     // TODO
-    Piece::new(PieceKind::L, PieceColor::Blue, 0)
+    Piece::new(PieceKind::L, PieceColor::Red, 0)
 }
