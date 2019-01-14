@@ -45,48 +45,64 @@ impl Model {
     }
 }
 
+enum StepOutcome<T> {
+    Continue,
+    Return(T),
+}
+
 impl Model {
-    fn stop_if_not_running(&mut self) -> bool {
-        self.running
+    fn stop_if_not_running(&mut self) -> StepOutcome<bool> {
+        match self.running {
+            true => StepOutcome::Continue,
+            false => StepOutcome::Return(false),
+        }
     }
 
-    fn spawn_piece_if_needed(&mut self) -> bool {
+    fn spawn_piece_if_needed(&mut self) -> StepOutcome<bool> {
         if !self.has_active_piece() {
             self.spawn_piece();
-            return false;
+            return StepOutcome::Return(false);
         }
 
-        true
+        StepOutcome::Continue
     }
 
-    fn lower_active_piece_if_possible(&mut self) -> bool {
+    fn lower_active_piece_if_possible(&mut self) -> StepOutcome<bool> {
         if !self.active_piece_touches_board() {
             self.lower_active_piece();
-            return false;
+            return StepOutcome::Return(false);
         }
 
-        true
+        StepOutcome::Continue
     }
 
-    fn materialization_process(&mut self) -> bool {
+    fn materialization_process(&mut self) -> StepOutcome<bool> {
         match self.materialize_active_piece() {
             MaterializationStatus::Success => {},
             MaterializationStatus::Failure => {
                 self.running = false;
-                return false;
+                return StepOutcome::Return(false);
             }
         }
 
         self.clear_filled_rows();
-        true
+
+        StepOutcome::Continue
     }
 
-    fn run_until_false(&mut self, steps: &[fn(&mut Self) -> bool]) {
+    fn run_steps<T>(
+        &mut self,
+        steps: &[fn(&mut Self) -> StepOutcome<T>],
+        default_return: T,
+    ) -> T {
         for step in steps.iter() {
-            if !step(self) {
-                break;
+            match step(self) {
+                StepOutcome::Continue => {},
+                StepOutcome::Return(value) => return value,
             }
         }
+
+        default_return
     }
 }
 
@@ -94,14 +110,12 @@ impl Tick for Model {
     fn tick(&mut self, elapsed_time: f64) -> bool {
         // TODO: add an artificial delay to make the game easier
 
-        self.run_until_false(&[
+        self.run_steps(&[
             Model::stop_if_not_running,
             Model::spawn_piece_if_needed,
             Model::lower_active_piece_if_possible,
             Model::materialization_process
-        ]);
-
-        false
+        ], false)
     }
 }
 
