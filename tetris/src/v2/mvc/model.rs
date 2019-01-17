@@ -1,3 +1,4 @@
+use sfml::window::Key;
 use super::super::board::{Block, MaterializationStatus, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
@@ -7,10 +8,12 @@ use super::super::position::BoardPosition;
 use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
 use super::traits::Tick;
+use super::InputHandler;
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     current_piece: Option<CurrentPiece>,
+    input_handler: InputHandler,
     settings: Settings,
     running: bool,
 }
@@ -52,6 +55,8 @@ impl Tick for Model {
             return false;
         }
 
+        self.handle_input();
+
         // TODO: add an artificial delay to make the game easier
 
         if !self.active_piece_touches_board() {
@@ -78,6 +83,7 @@ impl Model {
         Model {
             board_gravity_pair: get_boxed_gravity(&settings.gravity, &settings.board_size),
             current_piece: None,
+            input_handler: InputHandler::new(),
             settings: settings,
             running: true, // TODO: change to false later
         }
@@ -132,21 +138,71 @@ impl Model {
 }
 
 /**
+ * handle_input implementation + helpers
+ */
+impl Model {
+    fn handle_input(&mut self) {
+        self.input_handler.tick();
+
+        // TODO: find a better solution to this borrow checker issue
+        let pressed_keys: Vec<Key> = self.input_handler.get_pressed_keys()
+            .cloned()
+            .collect();
+
+        pressed_keys.iter().for_each(|key| {
+            match key {
+                Key::Left => {
+                    // TODO: allow signed values
+                    self.move_active_piece(BoardPosition::new(0, 1));
+                },
+                Key::Right => {
+                    self.move_active_piece(BoardPosition::new(0, 1));
+                },
+                _ => {},
+            }
+        });
+    }
+
+    fn move_active_piece(&mut self, direction: BoardPosition) {
+        if self.can_move_active_piece(&direction) {
+            let current_piece = self.current_piece.as_mut().unwrap();
+
+            current_piece.position += direction;
+        }
+    }
+
+    fn can_move_active_piece(&self, direction: &BoardPosition) -> bool {
+        self.get_translated_active_piece(direction)
+            .all(|tile_position| {
+                !self.is_beyond_walls(&tile_position) && !self.is_occupied(&tile_position)
+            })
+    }
+
+    fn get_translated_active_piece<'a>(
+        &'a self,
+        direction: &'a BoardPosition
+    ) -> impl Iterator<Item = BoardPosition> + 'a {
+        self.get_active_piece_iterator()
+            .map(move |tile_position| tile_position + direction)
+    }
+
+    fn is_beyond_walls(&self, position: &BoardPosition) -> bool {
+        let num_columns = self.board_gravity_pair.board().get_num_columns();
+        let position_column = position.get_column();
+
+        position_column < 0 || position_column >= num_columns
+    }
+}
+
+/**
  * active_piece_touches_board implementation + helpers
  */
 impl Model {
     fn active_piece_touches_board(&self) -> bool {
-        let next_row_offset = BoardPosition::new(1, 0);
-
-        for tile_position in self.get_active_piece_iterator() {
-            let tile_below = tile_position + &next_row_offset;
-
-            if self.is_below_floor(&tile_below) || self.is_occupied(&tile_below) {
-                return true;
-            }
-        }
-
-        false
+        self.get_translated_active_piece(&BoardPosition::new(1, 0))
+            .any(|tile_position| {
+                self.is_below_floor(&tile_position) || self.is_occupied(&tile_position)
+            })
     }
 
     fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
