@@ -16,7 +16,7 @@ fn main() {
     // board.get_filled_rows();
 
     let settings = Settings {
-        board_size: (10, 20),
+        board_size: (15, 20),
         gravity: Gravity::Naive,
         rotation_system: rotations::build_nintendo_rotation_system(),
     };

@@ -4,7 +4,7 @@ use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::helpers;
 use super::super::piece::{Piece, PieceColor, PieceKind};
-use super::super::position::BoardPosition;
+use super::super::position::{BoardPosition, BoardPositionOffset};
 use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
 use super::traits::Tick;
@@ -152,18 +152,17 @@ impl Model {
         pressed_keys.iter().for_each(|key| {
             match key {
                 Key::Left => {
-                    // TODO: allow signed values
-                    self.move_active_piece(BoardPosition::new(0, 1));
+                    self.move_active_piece(BoardPositionOffset::new(0, -1));
                 },
                 Key::Right => {
-                    self.move_active_piece(BoardPosition::new(0, 1));
+                    self.move_active_piece(BoardPositionOffset::new(0, 1));
                 },
                 _ => {},
             }
         });
     }
 
-    fn move_active_piece(&mut self, direction: BoardPosition) {
+    fn move_active_piece(&mut self, direction: BoardPositionOffset) {
         if self.can_move_active_piece(&direction) {
             let current_piece = self.current_piece.as_mut().unwrap();
 
@@ -171,7 +170,7 @@ impl Model {
         }
     }
 
-    fn can_move_active_piece(&self, direction: &BoardPosition) -> bool {
+    fn can_move_active_piece(&self, direction: &BoardPositionOffset) -> bool {
         self.get_translated_active_piece(direction)
             .all(|tile_position| {
                 !self.is_beyond_walls(&tile_position) && !self.is_occupied(&tile_position)
@@ -180,7 +179,7 @@ impl Model {
 
     fn get_translated_active_piece<'a>(
         &'a self,
-        direction: &'a BoardPosition
+        direction: &'a BoardPositionOffset
     ) -> impl Iterator<Item = BoardPosition> + 'a {
         self.get_active_piece_iterator()
             .map(move |tile_position| tile_position + direction)
@@ -199,7 +198,7 @@ impl Model {
  */
 impl Model {
     fn active_piece_touches_board(&self) -> bool {
-        self.get_translated_active_piece(&BoardPosition::new(1, 0))
+        self.get_translated_active_piece(&BoardPositionOffset::new(1, 0))
             .any(|tile_position| {
                 self.is_below_floor(&tile_position) || self.is_occupied(&tile_position)
             })
