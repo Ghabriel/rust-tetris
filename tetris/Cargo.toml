@@ -5,4 +5,5 @@ authors = ["Ghabriel <ghabriel.nunes@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+lazy_static = "^1.2.0"
 sfml = "^0.14.0"

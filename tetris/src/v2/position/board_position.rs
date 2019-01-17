@@ -66,8 +66,8 @@ impl Add<&BoardPositionOffset> for BoardPosition {
     }
 }
 
-impl AddAssign<BoardPositionOffset> for BoardPosition {
-    fn add_assign(&mut self, other: BoardPositionOffset) {
+impl AddAssign<&BoardPositionOffset> for BoardPosition {
+    fn add_assign(&mut self, other: &BoardPositionOffset) {
         let self_row = self.row as isize;
         let self_column = self.column as isize;
 

@@ -1,4 +1,6 @@
+use lazy_static::lazy_static;
 use sfml::window::Key;
+use std::collections::HashMap;
 use super::super::board::{Block, MaterializationStatus, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
@@ -21,6 +23,23 @@ pub struct Model {
 pub struct CurrentPiece {
     pub piece: Piece,
     pub position: BoardPosition,
+}
+
+#[derive(PartialEq, Eq, Hash)]
+enum Direction {
+    Left,
+    Right,
+}
+
+lazy_static! {
+    static ref DIRECTION_OFFSETS: HashMap<Direction, BoardPositionOffset> = {
+        let mut map = HashMap::new();
+
+        map.insert(Direction::Left, BoardPositionOffset::new(0, -1));
+        map.insert(Direction::Right, BoardPositionOffset::new(0, 1));
+
+        map
+    };
 }
 
 /**
@@ -152,29 +171,46 @@ impl Model {
         pressed_keys.iter().for_each(|key| {
             match key {
                 Key::Left => {
-                    self.move_active_piece(BoardPositionOffset::new(0, -1));
+                    self.move_active_piece(Direction::Left);
                 },
                 Key::Right => {
-                    self.move_active_piece(BoardPositionOffset::new(0, 1));
+                    self.move_active_piece(Direction::Right);
                 },
                 _ => {},
             }
         });
     }
 
-    fn move_active_piece(&mut self, direction: BoardPositionOffset) {
+    fn move_active_piece(&mut self, direction: Direction) {
         if self.can_move_active_piece(&direction) {
             let current_piece = self.current_piece.as_mut().unwrap();
+            let position_offset = DIRECTION_OFFSETS.get(&direction).unwrap();
 
-            current_piece.position += direction;
+            current_piece.position += position_offset;
         }
     }
 
-    fn can_move_active_piece(&self, direction: &BoardPositionOffset) -> bool {
-        self.get_translated_active_piece(direction)
+    fn can_move_active_piece(&self, direction: &Direction) -> bool {
+        let offset = DIRECTION_OFFSETS.get(direction).unwrap();
+
+        self.get_active_piece_iterator()
             .all(|tile_position| {
-                !self.is_beyond_walls(&tile_position) && !self.is_occupied(&tile_position)
+                !self.is_touching_wall(&tile_position, direction) &&
+                !self.is_occupied(&(tile_position + offset))
             })
+    }
+
+    fn is_touching_wall(&self, position: &BoardPosition, wall_direction: &Direction) -> bool {
+        let position_column = position.get_column();
+
+        match wall_direction {
+            Direction::Left => position_column == 0,
+            Direction::Right => {
+                let num_columns = self.board_gravity_pair.board().get_num_columns();
+
+                position_column == num_columns - 1
+            },
+        }
     }
 
     fn get_translated_active_piece<'a>(
@@ -183,13 +219,6 @@ impl Model {
     ) -> impl Iterator<Item = BoardPosition> + 'a {
         self.get_active_piece_iterator()
             .map(move |tile_position| tile_position + direction)
-    }
-
-    fn is_beyond_walls(&self, position: &BoardPosition) -> bool {
-        let num_columns = self.board_gravity_pair.board().get_num_columns();
-        let position_column = position.get_column();
-
-        position_column < 0 || position_column >= num_columns
     }
 }
 
