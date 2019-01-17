@@ -15,13 +15,16 @@ impl InputHandler {
     pub fn tick(&mut self) {
         let relevant_keys = [
             Key::Left,
+            Key::Right,
         ];
 
         for key in &relevant_keys {
-            if self.pressed_keys.contains(key) {
-                self.pressed_keys.remove(key);
-            } else if key.is_pressed() {
+            let is_key_pressed = key.is_pressed();
+
+            if is_key_pressed && !self.pressed_keys.contains(key) {
                 self.pressed_keys.insert(*key);
+            } else if !is_key_pressed {
+                self.pressed_keys.remove(key);
             }
         }
     }
