@@ -2,13 +2,15 @@ use std::time::{Duration, Instant};
 use super::super::helpers::FrequencyGauge;
 use super::traits::{Render, Tick};
 
+const NANOSECONDS_PER_SECOND: u64 = 1_000_000_000;
+
 static DEFAULT_UPDATE_FREQUENCY: u8 = 25;
 
 pub struct GameLoop<TUpdate, TRender> {
     update: TUpdate,
     render: TRender,
     running: bool,
-    update_period: f64,
+    update_period: u64,
     frequency_gauge: FrequencyGauge,
 }
 
@@ -22,27 +24,27 @@ where
             update,
             render,
             running: false,
-            update_period: 1000.0 / (DEFAULT_UPDATE_FREQUENCY as f64),
+            update_period: NANOSECONDS_PER_SECOND / (DEFAULT_UPDATE_FREQUENCY as u64),
             frequency_gauge: FrequencyGauge::new(),
         }
     }
 
     pub fn set_update_frequency(&mut self, ticks_per_second: u8) {
-        self.update_period = 1000.0 / (ticks_per_second as f64);
+        self.update_period = NANOSECONDS_PER_SECOND / (ticks_per_second as u64);
     }
 
     pub fn start(&mut self) {
         let mut last_measured_time = Instant::now();
-        let mut accumulator = 0.0;
+        let mut accumulator = 0;
 
         self.running = true;
         self.frequency_gauge.reset();
 
         while self.running {
             let now = Instant::now();
-            let elapsed_time = duration_as_millis(now.duration_since(last_measured_time));
+            let elapsed_time = duration_as_nanos(now.duration_since(last_measured_time));
             last_measured_time = now;
-            accumulator += elapsed_time as f64;
+            accumulator += elapsed_time;
 
             while accumulator >= self.update_period {
                 self.frequency_gauge.tick();
@@ -65,6 +67,6 @@ where
     }
 }
 
-fn duration_as_millis(duration: Duration) -> u64 {
-    duration.as_secs() * 1000 + (duration.subsec_millis() as u64)
+fn duration_as_nanos(duration: Duration) -> u64 {
+    duration.as_secs() * NANOSECONDS_PER_SECOND + (duration.subsec_nanos() as u64)
 }

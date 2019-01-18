@@ -66,7 +66,7 @@ impl Model {
 }
 
 impl Tick for Model {
-    fn tick(&mut self, elapsed_time: f64) -> bool {
+    fn tick(&mut self, elapsed_time_nanos: u64) -> bool {
         if !self.running {
             return false;
         }
