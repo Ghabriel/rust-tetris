@@ -29,6 +29,7 @@ pub struct CurrentPiece {
 enum Direction {
     Left,
     Right,
+    Down,
 }
 
 lazy_static! {
@@ -37,6 +38,7 @@ lazy_static! {
 
         map.insert(Direction::Left, BoardPositionOffset::new(0, -1));
         map.insert(Direction::Right, BoardPositionOffset::new(0, 1));
+        map.insert(Direction::Down, BoardPositionOffset::new(1, 0));
 
         map
     };
@@ -78,8 +80,8 @@ impl Tick for Model {
 
         // TODO: add an artificial delay to make the game easier
 
-        if !self.active_piece_touches_board() {
-            self.lower_active_piece();
+        if self.can_move_active_piece(&Direction::Down) {
+            self.move_active_piece(&Direction::Down);
             return false;
         }
 
@@ -171,22 +173,19 @@ impl Model {
         pressed_keys.iter().for_each(|key| {
             match key {
                 Key::Left => {
-                    self.move_active_piece(Direction::Left);
+                    self.try_move_active_piece(Direction::Left);
                 },
                 Key::Right => {
-                    self.move_active_piece(Direction::Right);
+                    self.try_move_active_piece(Direction::Right);
                 },
                 _ => {},
             }
         });
     }
 
-    fn move_active_piece(&mut self, direction: Direction) {
+    fn try_move_active_piece(&mut self, direction: Direction) {
         if self.can_move_active_piece(&direction) {
-            let current_piece = self.current_piece.as_mut().unwrap();
-            let position_offset = DIRECTION_OFFSETS.get(&direction).unwrap();
-
-            current_piece.position += position_offset;
+            self.move_active_piece(&direction);
         }
     }
 
@@ -200,64 +199,43 @@ impl Model {
             })
     }
 
-    fn is_touching_wall(&self, position: &BoardPosition, wall_direction: &Direction) -> bool {
-        let position_column = position.get_column();
-
-        match wall_direction {
-            Direction::Left => position_column == 0,
-            Direction::Right => {
-                let num_columns = self.board_gravity_pair.board().get_num_columns();
-
-                position_column == num_columns - 1
-            },
-        }
-    }
-
-    fn get_translated_active_piece<'a>(
-        &'a self,
-        direction: &'a BoardPositionOffset
-    ) -> impl Iterator<Item = BoardPosition> + 'a {
-        self.get_active_piece_iterator()
-            .map(move |tile_position| tile_position + direction)
-    }
-}
-
-/**
- * active_piece_touches_board implementation + helpers
- */
-impl Model {
-    fn active_piece_touches_board(&self) -> bool {
-        self.get_translated_active_piece(&BoardPositionOffset::new(1, 0))
-            .any(|tile_position| {
-                self.is_below_floor(&tile_position) || self.is_occupied(&tile_position)
-            })
-    }
-
     fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
         let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
 
         helpers::get_piece_iterator(piece, position, self.get_rotation_system())
     }
 
+    fn is_touching_wall(&self, position: &BoardPosition, wall_direction: &Direction) -> bool {
+        match wall_direction {
+            Direction::Left => {
+                let position_column = position.get_column();
+
+                position_column == 0
+            },
+            Direction::Right => {
+                let position_column = position.get_column();
+                let num_columns = self.board_gravity_pair.board().get_num_columns();
+
+                position_column == num_columns - 1
+            },
+            Direction::Down => {
+                let position_row = position.get_row();
+                let num_rows = self.board_gravity_pair.board().get_num_rows();
+
+                position_row == num_rows - 1
+            }
+        }
+    }
+
     fn is_occupied(&self, position: &BoardPosition) -> bool {
         self.board_gravity_pair.board().is_occupied(position)
     }
 
-    fn is_below_floor(&self, position: &BoardPosition) -> bool {
-        let num_rows = self.board_gravity_pair.board().get_num_rows();
-
-        position.get_row() >= num_rows
-    }
-}
-
-/**
- * lower_active_piece implementation
- */
-impl Model {
-    fn lower_active_piece(&mut self) {
+    fn move_active_piece(&mut self, direction: &Direction) {
         let current_piece = self.current_piece.as_mut().unwrap();
+        let position_offset = DIRECTION_OFFSETS.get(&direction).unwrap();
 
-        current_piece.position += BoardPosition::new(1, 0);
+        current_piece.position += position_offset;
     }
 }
 
