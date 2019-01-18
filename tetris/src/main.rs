@@ -1,5 +1,5 @@
+use tetris::core::{GameLoop, GameRenderer, Model};
 use tetris::gravity::Gravity;
-use tetris::mvc::{GameLoop, GameRenderer, Model};
 use tetris::rotations;
 use tetris::settings::Settings;
 
