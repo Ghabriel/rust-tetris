@@ -1,8 +1,8 @@
-// pub mod board;
-// pub mod piece;
-// pub mod rotations;
-// pub mod settings;
-
-mod v2;
-
-pub use self::v2::*;
+pub mod board;
+pub mod gravity;
+pub mod helpers;
+pub mod mvc;
+pub mod piece;
+pub mod position;
+pub mod rotations;
+pub mod settings;
