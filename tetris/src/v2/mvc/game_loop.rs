@@ -1,4 +1,5 @@
 use std::time::{Duration, Instant};
+use super::super::helpers::FrequencyGauge;
 use super::traits::{Render, Tick};
 
 static DEFAULT_UPDATE_FREQUENCY: u8 = 25;
@@ -8,6 +9,7 @@ pub struct GameLoop<TUpdate, TRender> {
     render: TRender,
     running: bool,
     update_period: f64,
+    frequency_gauge: FrequencyGauge,
 }
 
 impl<TUpdate, TRender> GameLoop<TUpdate, TRender>
@@ -21,6 +23,7 @@ where
             render,
             running: false,
             update_period: 1000.0 / (DEFAULT_UPDATE_FREQUENCY as f64),
+            frequency_gauge: FrequencyGauge::new(),
         }
     }
 
@@ -33,6 +36,7 @@ where
         let mut accumulator = 0.0;
 
         self.running = true;
+        self.frequency_gauge.reset();
 
         while self.running {
             let now = Instant::now();
@@ -41,6 +45,12 @@ where
             accumulator += elapsed_time as f64;
 
             while accumulator >= self.update_period {
+                self.frequency_gauge.tick();
+
+                if self.frequency_gauge.get_tick_count() % 25 == 0 {
+                    println!("Tick rate: {}", self.frequency_gauge.measure());
+                }
+
                 if self.update.tick(self.update_period) {
                     self.running = false;
                 }
