@@ -1,3 +1,4 @@
+mod delay;
 mod game_assets;
 mod game_loop;
 mod game_renderer;
@@ -6,6 +7,7 @@ mod model;
 mod traits;
 mod view;
 
+pub use self::delay::Delay;
 pub use self::game_assets::GameAssets;
 pub use self::game_loop::GameLoop;
 pub use self::game_renderer::GameRenderer;

@@ -10,7 +10,7 @@ use super::super::position::{BoardPosition, BoardPositionOffset};
 use super::super::rotations::RotationSystem;
 use super::super::settings::Settings;
 use super::traits::Tick;
-use super::InputHandler;
+use super::{Delay, InputHandler};
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
@@ -18,6 +18,7 @@ pub struct Model {
     input_handler: InputHandler,
     settings: Settings,
     running: bool,
+    delay: Delay,
 }
 
 pub struct CurrentPiece {
@@ -78,7 +79,10 @@ impl Tick for Model {
 
         self.handle_input();
 
-        // TODO: add an artificial delay to make the game easier
+        self.delay.tick();
+        if self.delay.block_for_frames(6) {
+            return false;
+        }
 
         if self.can_move_active_piece(&Direction::Down) {
             self.move_active_piece(&Direction::Down);
@@ -107,6 +111,7 @@ impl Model {
             input_handler: InputHandler::new(),
             settings: settings,
             running: true, // TODO: change to false later
+            delay: Delay::new(),
         }
     }
 

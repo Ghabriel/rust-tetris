@@ -26,5 +26,6 @@ fn main() {
 
     let mut game_loop = GameLoop::new(model, renderer);
 
+    game_loop.set_update_frequency(60);
     game_loop.start();
 }
