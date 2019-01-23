@@ -7,7 +7,7 @@ use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::helpers;
 use super::super::piece::{Piece, PieceColor, PieceKind};
 use super::super::position::{BoardPosition, BoardPositionOffset};
-use super::super::rotations::RotationSystem;
+use super::super::rotations::{RotationDirection, RotationSystem};
 use super::super::settings::Settings;
 use super::traits::Tick;
 use super::{Delay, InputHandler};
@@ -183,6 +183,12 @@ impl Model {
                 Key::Right => {
                     self.try_move_active_piece(Direction::Right);
                 },
+                Key::A => {
+                    self.try_rotate_active_piece(RotationDirection::Counterclockwise);
+                },
+                Key::S => {
+                    self.try_rotate_active_piece(RotationDirection::Clockwise);
+                },
                 _ => {},
             }
         });
@@ -241,6 +247,12 @@ impl Model {
         let position_offset = DIRECTION_OFFSETS.get(&direction).unwrap();
 
         current_piece.position += position_offset;
+    }
+
+    fn try_rotate_active_piece(&mut self, direction: RotationDirection) {
+        let current_piece = self.current_piece.as_mut().unwrap();
+
+        current_piece.piece.rotate(direction, &self.settings.rotation_system);
     }
 }
 

@@ -18,6 +18,8 @@ impl InputHandler {
         let relevant_keys = [
             Key::Left,
             Key::Right,
+            Key::A,
+            Key::S,
         ];
 
         for key in &relevant_keys {
