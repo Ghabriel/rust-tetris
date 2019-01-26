@@ -206,14 +206,24 @@ impl Model {
                         .try_move_towards(
                             direction,
                             &self.settings.rotation_system,
-                            self.board_gravity_pair.board()
+                            self.board_gravity_pair.board(),
                         );
                 },
-                Key::A => {
-                    self.try_rotate_active_piece(RotationDirection::Counterclockwise);
-                },
-                Key::S => {
-                    self.try_rotate_active_piece(RotationDirection::Clockwise);
+                Key::A | Key::S => {
+                    let direction = match key {
+                        Key::A => RotationDirection::Counterclockwise,
+                        Key::S => RotationDirection::Clockwise,
+                        _ => unreachable!(),
+                    };
+
+                    self.active_piece
+                        .as_mut()
+                        .unwrap()
+                        .try_rotate(
+                            direction,
+                            &self.settings.rotation_system,
+                            self.board_gravity_pair.board(),
+                        );
                 },
                 _ => {},
             }
@@ -222,50 +232,6 @@ impl Model {
 
     fn get_active_piece_mut(&mut self) -> &mut ActivePiece {
         self.active_piece.as_mut().unwrap()
-    }
-
-    fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
-        let rotation_system = self.get_rotation_system();
-
-        self.active_piece
-            .as_ref()
-            .unwrap()
-            .get_block_iterator(rotation_system)
-    }
-
-    fn try_rotate_active_piece(&mut self, direction: RotationDirection) {
-        self.rotate_active_piece(&direction);
-
-        if !self.is_active_piece_valid() {
-            let reverse_direction = match direction {
-                RotationDirection::Clockwise => RotationDirection::Counterclockwise,
-                RotationDirection::Counterclockwise => RotationDirection::Clockwise,
-            };
-
-            self.rotate_active_piece(&reverse_direction);
-        }
-    }
-
-    fn rotate_active_piece(&mut self, direction: &RotationDirection) {
-        let current_piece = self.active_piece.as_mut().unwrap();
-
-        current_piece.piece.rotate(direction, &self.settings.rotation_system);
-    }
-
-    fn is_active_piece_valid(&self) -> bool {
-        let board = self.get_board();
-
-        self.get_active_piece_iterator()
-            .all(|tile_position| {
-                self.is_inside_board(&tile_position) && !board.is_occupied(&tile_position)
-            })
-    }
-
-    fn is_inside_board(&self, position: &BoardPosition) -> bool {
-        let board_num_rows = self.get_board_num_rows();
-        let board_num_columns = self.get_board_num_columns();
-
-        position.is_inside_grid(board_num_rows, board_num_columns)
     }
 }
 
