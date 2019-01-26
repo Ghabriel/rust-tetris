@@ -4,7 +4,7 @@ use super::super::helpers;
 use super::super::piece::{Piece, PieceColor};
 use super::super::position::{BoardPosition, WindowPosition};
 use super::super::settings;
-use super::model::CurrentPiece;
+use super::model::ActivePiece;
 use super::{GameAssets, Model};
 
 pub struct View {
@@ -85,7 +85,7 @@ impl View {
 
     pub fn render_active_piece(&mut self, model: &Model, assets: &mut GameAssets) {
         if let Some(active_piece) = model.get_active_piece() {
-            let CurrentPiece { piece, position } = active_piece;
+            let ActivePiece { piece, position } = active_piece;
 
             self.render_piece(model, piece, position, assets);
         }

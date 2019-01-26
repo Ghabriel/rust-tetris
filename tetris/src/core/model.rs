@@ -14,14 +14,14 @@ use super::{Delay, InputHandler};
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
-    current_piece: Option<CurrentPiece>,
+    active_piece: Option<ActivePiece>,
     input_handler: InputHandler,
     settings: Settings,
     running: bool,
     delay: Delay,
 }
 
-pub struct CurrentPiece {
+pub struct ActivePiece {
     pub piece: Piece,
     pub position: BoardPosition,
 }
@@ -53,8 +53,8 @@ impl Model {
         self.board_gravity_pair.board().for_each_row(callback);
     }
 
-    pub fn get_active_piece(&self) -> &Option<CurrentPiece> {
-        &self.current_piece
+    pub fn get_active_piece(&self) -> &Option<ActivePiece> {
+        &self.active_piece
     }
 
     pub fn get_rotation_system(&self) -> &RotationSystem {
@@ -111,7 +111,7 @@ impl Model {
     pub fn new(settings: Settings) -> Model {
         Model {
             board_gravity_pair: get_boxed_gravity(&settings.gravity, &settings.board_size),
-            current_piece: None,
+            active_piece: None,
             input_handler: InputHandler::new(),
             settings: settings,
             running: true, // TODO: change to false later
@@ -134,7 +134,7 @@ impl Model {
  */
 impl Model {
     fn has_active_piece(&self) -> bool {
-        self.current_piece.is_some()
+        self.active_piece.is_some()
     }
 }
 
@@ -146,7 +146,7 @@ impl Model {
         let piece = random_piece();
         let position = self.get_centralized_position_for(&piece);
 
-        self.current_piece = Some(CurrentPiece { piece, position });
+        self.active_piece = Some(ActivePiece { piece, position });
     }
 
     fn get_centralized_position_for(&self, piece: &Piece) -> BoardPosition {
@@ -215,7 +215,7 @@ impl Model {
     }
 
     fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
-        let CurrentPiece { piece, position } = self.current_piece.as_ref().unwrap();
+        let ActivePiece { piece, position } = self.active_piece.as_ref().unwrap();
 
         helpers::get_piece_iterator(piece, position, self.get_rotation_system())
     }
@@ -243,7 +243,7 @@ impl Model {
     }
 
     fn move_active_piece(&mut self, direction: &Direction) {
-        let current_piece = self.current_piece.as_mut().unwrap();
+        let current_piece = self.active_piece.as_mut().unwrap();
         let position_offset = DIRECTION_OFFSETS.get(&direction).unwrap();
 
         current_piece.position += position_offset;
@@ -263,7 +263,7 @@ impl Model {
     }
 
     fn rotate_active_piece(&mut self, direction: &RotationDirection) {
-        let current_piece = self.current_piece.as_mut().unwrap();
+        let current_piece = self.active_piece.as_mut().unwrap();
 
         current_piece.piece.rotate(direction, &self.settings.rotation_system);
     }
@@ -288,7 +288,7 @@ impl Model {
  */
 impl Model {
     fn materialize_active_piece(&mut self) -> MaterializationStatus {
-        let CurrentPiece { piece, position } = self.current_piece.take().unwrap();
+        let ActivePiece { piece, position } = self.active_piece.take().unwrap();
 
         self.board_gravity_pair.board_mut().materialize(
             &piece,
