@@ -3,11 +3,9 @@ use sfml::window::{Event, Style};
 use super::super::helpers;
 use super::super::piece::{Piece, PieceColor};
 use super::super::position::{BoardPosition, WindowPosition};
+use super::super::settings;
 use super::model::CurrentPiece;
 use super::{GameAssets, Model};
-
-const TILE_SIZE: usize = 18;
-const TILE_SCALING: f32 = 1.5;
 
 pub struct View {
     window: RenderWindow,
@@ -27,7 +25,10 @@ impl View {
             &Default::default()
         );
 
-        let board_view_position = WindowPosition::new(20., 10.);
+        let board_view_position = WindowPosition::new(
+            settings::BOARD_VIEW_POSITION_Y,
+            settings::BOARD_VIEW_POSITION_X,
+        );
 
         View {
             window,
@@ -116,8 +117,10 @@ impl View {
     }
 
     fn to_window_coordinates(&self, board_position: &BoardPosition) -> WindowPosition {
-        let row = TILE_SCALING * (board_position.row as usize * TILE_SIZE) as f32;
-        let column = TILE_SCALING * (board_position.column as usize * TILE_SIZE) as f32;
+        let tile_scaling = settings::TILE_SCALING;
+        let tile_size = settings::TILE_SIZE;
+        let row = tile_scaling * (board_position.row as usize * tile_size) as f32;
+        let column = tile_scaling * (board_position.column as usize * tile_size) as f32;
 
         WindowPosition::new(row, column)
     }
@@ -125,21 +128,22 @@ impl View {
 
 fn make_block_sprite(assets: &GameAssets) -> Sprite {
     let mut block_sprite = assets.make_block_sprite();
-    block_sprite.scale((TILE_SCALING, TILE_SCALING));
+    let tile_scaling = settings::TILE_SCALING;
+    block_sprite.scale((tile_scaling, tile_scaling));
 
     block_sprite
 }
 
 fn set_block_color(block_sprite: &mut Sprite, color: &PieceColor) {
     let (color_x, color_y) = get_block_color_coordinates(color);
-    let tile_size = TILE_SIZE as i32;
+    let tile_size = settings::TILE_SIZE as i32;
     let tileset_coordinates = IntRect::new(color_x, color_y, tile_size, tile_size);
 
     block_sprite.set_texture_rect(&tileset_coordinates);
 }
 
 fn get_block_color_coordinates(color: &PieceColor) -> (i32, i32) {
-    let tile_size = TILE_SIZE as i32;
+    let tile_size = settings::TILE_SIZE as i32;
 
     match color {
         PieceColor::Blue   => (0 * tile_size, 0),
