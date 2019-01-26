@@ -88,14 +88,16 @@ impl SimpleBoard {
     }
 
     fn position_to_index(&self, position: &BoardPosition) -> Option<usize> {
-        let &BoardPosition { row, column } = position;
-        let num_rows = self.get_num_rows() as isize;
-        let num_columns = self.get_num_columns() as isize;
+        let num_rows = self.get_num_rows();
+        let num_columns = self.get_num_columns();
 
-        if row < 0 || row >= num_rows || column < 0 || column >= num_columns {
-            None
+        if position.is_inside_grid(num_rows, num_columns) {
+            let &BoardPosition { row, column } = position;
+            let index = row * num_columns as isize + column;
+
+            Some(index as usize)
         } else {
-            Some((row * num_columns + column) as usize)
+            None
         }
     }
 }

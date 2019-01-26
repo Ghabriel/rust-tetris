@@ -12,7 +12,7 @@ impl Piece {
         Piece { kind, color, rotation_index }
     }
 
-    pub fn rotate(&mut self, direction: RotationDirection, rotation_system: &RotationSystem) {
+    pub fn rotate(&mut self, direction: &RotationDirection, rotation_system: &RotationSystem) {
         let rotation_table = self.get_rotation_table(rotation_system);
         let num_rotations = rotation_table.len();
 

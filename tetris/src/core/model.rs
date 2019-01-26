@@ -61,6 +61,10 @@ impl Model {
         &self.settings.rotation_system
     }
 
+    pub fn get_board_num_rows(&self) -> usize {
+        self.board_gravity_pair.board().get_num_rows()
+    }
+
     pub fn get_board_num_columns(&self) -> usize {
         self.board_gravity_pair.board().get_num_columns()
     }
@@ -246,9 +250,36 @@ impl Model {
     }
 
     fn try_rotate_active_piece(&mut self, direction: RotationDirection) {
+        self.rotate_active_piece(&direction);
+
+        if !self.is_active_piece_valid() {
+            let reverse_direction = match direction {
+                RotationDirection::Clockwise => RotationDirection::Counterclockwise,
+                RotationDirection::Counterclockwise => RotationDirection::Clockwise,
+            };
+
+            self.rotate_active_piece(&reverse_direction);
+        }
+    }
+
+    fn rotate_active_piece(&mut self, direction: &RotationDirection) {
         let current_piece = self.current_piece.as_mut().unwrap();
 
         current_piece.piece.rotate(direction, &self.settings.rotation_system);
+    }
+
+    fn is_active_piece_valid(&self) -> bool {
+        self.get_active_piece_iterator()
+            .all(|tile_position| {
+                self.is_inside_board(&tile_position) && !self.is_occupied(&tile_position)
+            })
+    }
+
+    fn is_inside_board(&self, position: &BoardPosition) -> bool {
+        let board_num_rows = self.get_board_num_rows();
+        let board_num_columns = self.get_board_num_columns();
+
+        position.is_inside_grid(board_num_rows, board_num_columns)
     }
 }
 

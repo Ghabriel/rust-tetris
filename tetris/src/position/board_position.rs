@@ -12,6 +12,16 @@ impl BoardPosition {
     pub fn new(row: isize, column: isize) -> BoardPosition {
         BoardPosition { row, column }
     }
+
+    pub fn is_inside_grid(&self, num_rows: usize, num_columns: usize) -> bool {
+        let num_rows = num_rows as isize;
+        let num_columns = num_columns as isize;
+
+        self.row >= 0
+        && self.row < num_rows
+        && self.column >= 0
+        && self.column < num_columns
+    }
 }
 
 impl Add<&BoardPosition> for BoardPosition {
