@@ -4,32 +4,13 @@ use super::BoardPositionOffset;
 // TODO: reduce the redundancy between BoardPosition, PiecePosition and WindowPosition
 
 pub struct BoardPosition {
-    row: usize,
-    column: usize,
+    pub row: isize,
+    pub column: isize,
 }
 
 impl BoardPosition {
-    pub fn new(row: usize, column: usize) -> BoardPosition {
+    pub fn new(row: isize, column: isize) -> BoardPosition {
         BoardPosition { row, column }
-    }
-
-    pub fn from_index(index: usize, num_columns: usize) -> BoardPosition {
-        BoardPosition {
-            row: index / num_columns,
-            column: index % num_columns,
-        }
-    }
-
-    pub fn to_index(&self, num_columns: usize) -> usize {
-        self.row * num_columns + self.column
-    }
-
-    pub fn get_row(&self) -> usize {
-        self.row
-    }
-
-    pub fn get_column(&self) -> usize {
-        self.column
     }
 }
 
@@ -60,8 +41,8 @@ impl Add<&BoardPositionOffset> for BoardPosition {
         let self_column = self.column as isize;
 
         BoardPosition {
-            row: (self_row + other.get_row()) as usize,
-            column: (self_column + other.get_column()) as usize,
+            row: self_row + other.get_row(),
+            column: self_column + other.get_column(),
         }
     }
 }
@@ -71,7 +52,7 @@ impl AddAssign<&BoardPositionOffset> for BoardPosition {
         let self_row = self.row as isize;
         let self_column = self.column as isize;
 
-        self.row = (self_row + other.get_row()) as usize;
-        self.column = (self_column + other.get_column()) as usize;
+        self.row = self_row + other.get_row();
+        self.column = self_column + other.get_column();
     }
 }

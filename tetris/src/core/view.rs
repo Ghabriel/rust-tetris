@@ -71,7 +71,7 @@ impl View {
                     if let Some(block) = tile {
                         set_tile_color(&mut tile_sprite, &block.color);
 
-                        let tile_coordinates = BoardPosition::new(row_index, tile_index);
+                        let tile_coordinates = BoardPosition::new(row_index, tile_index as isize);
 
                         self.draw_tile(&tile_coordinates, &mut tile_sprite);
                     }
@@ -112,9 +112,10 @@ impl View {
                     grid_num_columns
                 );
 
+                // TODO: analyze redundancy: get_piece_iterator.rs
                 let block_position = BoardPosition::new(
-                    block_in_piece_coordinates.get_row() + piece_position.get_row(),
-                    block_in_piece_coordinates.get_column() + piece_position.get_column(),
+                    block_in_piece_coordinates.get_row() as isize + piece_position.row,
+                    block_in_piece_coordinates.get_column() as isize + piece_position.column,
                 );
 
                 self.draw_tile(&block_position, &mut tile_sprite);
@@ -130,8 +131,8 @@ impl View {
     }
 
     fn to_window_coordinates(&self, board_position: &BoardPosition) -> WindowPosition {
-        let row = TILE_SCALING * (board_position.get_row() * TILE_SIZE) as f32;
-        let column = TILE_SCALING * (board_position.get_column() * TILE_SIZE) as f32;
+        let row = TILE_SCALING * (board_position.row as usize * TILE_SIZE) as f32;
+        let column = TILE_SCALING * (board_position.column as usize * TILE_SIZE) as f32;
 
         WindowPosition::new(row, column)
     }

@@ -21,8 +21,8 @@ pub fn get_piece_iterator<'a>(
             );
 
             BoardPosition::new(
-                block_in_piece_coordinates.get_row() + piece_position.get_row(),
-                block_in_piece_coordinates.get_column() + piece_position.get_column(),
+                block_in_piece_coordinates.get_row() as isize + piece_position.row,
+                block_in_piece_coordinates.get_column() as isize + piece_position.column,
             )
         })
 }

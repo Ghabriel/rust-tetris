@@ -151,7 +151,7 @@ impl Model {
 
         BoardPosition::new(
             0,
-            (board_num_columns - grid_num_columns) / 2,
+            ((board_num_columns - grid_num_columns) / 2) as isize,
         )
     }
 
@@ -219,21 +219,17 @@ impl Model {
     fn is_touching_wall(&self, position: &BoardPosition, wall_direction: &Direction) -> bool {
         match wall_direction {
             Direction::Left => {
-                let position_column = position.get_column();
-
-                position_column == 0
+                position.column == 0
             },
             Direction::Right => {
-                let position_column = position.get_column();
-                let num_columns = self.board_gravity_pair.board().get_num_columns();
+                let num_columns = self.board_gravity_pair.board().get_num_columns() as isize;
 
-                position_column == num_columns - 1
+                position.column == num_columns - 1
             },
             Direction::Down => {
-                let position_row = position.get_row();
-                let num_rows = self.board_gravity_pair.board().get_num_rows();
+                let num_rows = self.board_gravity_pair.board().get_num_rows() as isize;
 
-                position_row == num_rows - 1
+                position.row == num_rows - 1
             }
         }
     }

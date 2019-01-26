@@ -11,6 +11,8 @@ pub struct SimpleBoard {
     num_columns: usize,
 }
 
+struct PositionOutOfBounds;
+
 impl SimpleBoard {
     pub fn new(num_columns: usize, num_rows: usize) -> SimpleBoard {
         let grid_size = num_rows * num_columns;
@@ -65,16 +67,36 @@ impl SimpleBoard {
         RowIterator::new(self)
     }
 
-    fn at(&self, position: &BoardPosition) -> &Option<Block> {
-        let index = position.to_index(self.get_num_columns());
+    fn at(&self, position: &BoardPosition) -> Result<&Option<Block>, PositionOutOfBounds> {
+        let index_opt = self.position_to_index(position);
 
-        &self.grid[index]
+        if let Some(index) = index_opt {
+            Ok(&self.grid[index])
+        } else {
+            Err(PositionOutOfBounds)
+        }
     }
 
-    fn at_mut(&mut self, position: &BoardPosition) -> &mut Option<Block> {
-        let index = position.to_index(self.get_num_columns());
+    fn at_mut(&mut self, position: &BoardPosition) -> Result<&mut Option<Block>, PositionOutOfBounds> {
+        let index_opt = self.position_to_index(position);
 
-        &mut self.grid[index]
+        if let Some(index) = index_opt {
+            Ok(&mut self.grid[index])
+        } else {
+            Err(PositionOutOfBounds)
+        }
+    }
+
+    fn position_to_index(&self, position: &BoardPosition) -> Option<usize> {
+        let &BoardPosition { row, column } = position;
+        let num_rows = self.get_num_rows() as isize;
+        let num_columns = self.get_num_columns() as isize;
+
+        if row < 0 || row >= num_rows || column < 0 || column >= num_columns {
+            None
+        } else {
+            Some((row * num_columns + column) as usize)
+        }
     }
 }
 
@@ -87,8 +109,15 @@ impl Board for SimpleBoard {
         self.grid.len() / self.num_columns
     }
 
+    /**
+     * Checks if a given position is occupied by a block. Returns false if
+     * the position is out of bounds.
+     */
     fn is_occupied(&self, position: &BoardPosition) -> bool {
-        self.at(position).is_some()
+        match self.at(position) {
+            Ok(tile) => tile.is_some(),
+            Err(_) => false,
+        }
     }
 
     fn materialize(
@@ -104,8 +133,8 @@ impl Board for SimpleBoard {
             let board_tile = self.at_mut(&tile_position);
 
             match board_tile {
-                Some(_) => return MaterializationStatus::Failure,
-                None => *board_tile = Some(Block { color: (*piece_color).clone() }),
+                Ok(Some(_)) | Err(_) => return MaterializationStatus::Failure,
+                Ok(empty_tile) => *empty_tile = Some(Block { color: (*piece_color).clone() }),
             }
         }
 
