@@ -1,7 +1,8 @@
 use sfml::graphics::{Color, IntRect, RenderTarget, RenderWindow, Sprite, Transformable};
 use sfml::window::{Event, Style};
+use super::super::helpers;
 use super::super::piece::{Piece, PieceColor};
-use super::super::position::{BoardPosition, PiecePosition, WindowPosition};
+use super::super::position::{BoardPosition, WindowPosition};
 use super::model::CurrentPiece;
 use super::{GameAssets, Model};
 
@@ -61,7 +62,7 @@ impl View {
     }
 
     pub fn render_board(&mut self, model: &Model, assets: &mut GameAssets) {
-        let mut tile_sprite = make_tile_sprite(assets);
+        let mut block_sprite = make_block_sprite(assets);
         let mut row_index = 0;
 
         model.for_each_row(&mut |row| {
@@ -69,11 +70,11 @@ impl View {
                 .enumerate()
                 .for_each(|(tile_index, tile)| {
                     if let Some(block) = tile {
-                        set_tile_color(&mut tile_sprite, &block.color);
+                        set_block_color(&mut block_sprite, &block.color);
 
                         let tile_coordinates = BoardPosition::new(row_index, tile_index as isize);
 
-                        self.draw_tile(&tile_coordinates, &mut tile_sprite);
+                        self.draw_block(&tile_coordinates, &mut block_sprite);
                     }
                 });
 
@@ -96,35 +97,19 @@ impl View {
         piece_position: &BoardPosition,
         assets: &mut GameAssets,
     ) {
-        let grid = piece.get_grid(model.get_rotation_system());
-        let grid_size = grid.0.len();
-        let grid_num_columns = (grid_size as f32).sqrt() as usize;
-        let mut tile_sprite = make_tile_sprite(assets);
+        let mut block_sprite = make_block_sprite(assets);
 
-        set_tile_color(&mut tile_sprite, piece.get_color());
+        set_block_color(&mut block_sprite, piece.get_color());
 
-        grid.0.iter()
-            .enumerate()
-            .filter(|(_, tile)| **tile)
-            .for_each(|(tile_index, _)| {
-                let block_in_piece_coordinates = PiecePosition::from_index(
-                    tile_index,
-                    grid_num_columns
-                );
-
-                // TODO: analyze redundancy: get_piece_iterator.rs
-                let block_position = BoardPosition::new(
-                    block_in_piece_coordinates.get_row() as isize + piece_position.row,
-                    block_in_piece_coordinates.get_column() as isize + piece_position.column,
-                );
-
-                self.draw_tile(&block_position, &mut tile_sprite);
+        helpers::get_piece_iterator(piece, piece_position, model.get_rotation_system())
+            .for_each(|block_position| {
+                self.draw_block(&block_position, &mut block_sprite);
             });
     }
 
-    fn draw_tile(&mut self, tile_position: &BoardPosition, sprite: &mut Sprite) {
-        let tile_window_position = self.to_window_coordinates(&tile_position);
-        let target_position = tile_window_position + &self.board_view_position;
+    fn draw_block(&mut self, block_position: &BoardPosition, sprite: &mut Sprite) {
+        let block_window_position = self.to_window_coordinates(&block_position);
+        let target_position = block_window_position + &self.board_view_position;
 
         sprite.set_position(target_position.as_xy());
         self.window.draw(sprite);
@@ -138,22 +123,22 @@ impl View {
     }
 }
 
-fn make_tile_sprite(assets: &GameAssets) -> Sprite {
-    let mut tile_sprite = assets.make_tile_sprite();
-    tile_sprite.scale((TILE_SCALING, TILE_SCALING));
+fn make_block_sprite(assets: &GameAssets) -> Sprite {
+    let mut block_sprite = assets.make_block_sprite();
+    block_sprite.scale((TILE_SCALING, TILE_SCALING));
 
-    tile_sprite
+    block_sprite
 }
 
-fn set_tile_color(tile_sprite: &mut Sprite, color: &PieceColor) {
-    let (color_x, color_y) = get_tile_color_coordinates(color);
+fn set_block_color(block_sprite: &mut Sprite, color: &PieceColor) {
+    let (color_x, color_y) = get_block_color_coordinates(color);
     let tile_size = TILE_SIZE as i32;
     let tileset_coordinates = IntRect::new(color_x, color_y, tile_size, tile_size);
 
-    tile_sprite.set_texture_rect(&tileset_coordinates);
+    block_sprite.set_texture_rect(&tileset_coordinates);
 }
 
-fn get_tile_color_coordinates(color: &PieceColor) -> (i32, i32) {
+fn get_block_color_coordinates(color: &PieceColor) -> (i32, i32) {
     let tile_size = TILE_SIZE as i32;
 
     match color {
