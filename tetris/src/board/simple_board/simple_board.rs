@@ -1,3 +1,4 @@
+use super::super::super::core::Direction;
 use super::super::super::helpers;
 use super::super::super::piece::{Piece, PieceColor};
 use super::super::super::position::BoardPosition;
@@ -120,6 +121,32 @@ impl Board for SimpleBoard {
             Ok(tile) => tile.is_some(),
             Err(_) => false,
         }
+    }
+
+    fn is_touching_wall(
+        &self,
+        position: &BoardPosition,
+        wall_direction: &Direction,
+    ) -> bool {
+        match wall_direction {
+            Direction::Left => {
+                position.column == 0
+            },
+            Direction::Right => {
+                let num_columns = self.get_num_columns() as isize;
+
+                position.column == num_columns - 1
+            },
+            Direction::Down => {
+                let num_rows = self.get_num_rows() as isize;
+
+                position.row == num_rows - 1
+            }
+        }
+    }
+
+    fn is_in_bounds(&self, position: &BoardPosition) -> bool {
+        position.is_inside_grid(self.get_num_rows(), self.get_num_columns())
     }
 
     fn materialize(

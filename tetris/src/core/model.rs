@@ -1,15 +1,13 @@
-use lazy_static::lazy_static;
 use sfml::window::Key;
-use std::collections::HashMap;
 use super::super::board::{Block, Board, MaterializationStatus, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
 use super::super::piece::{Piece, PieceColor, PieceKind};
-use super::super::position::{BoardPosition, BoardPositionOffset};
+use super::super::position::BoardPosition;
 use super::super::rotations::{RotationDirection, RotationSystem};
 use super::super::settings::Settings;
 use super::traits::Tick;
-use super::{ActivePiece, Delay, InputHandler};
+use super::{ActivePiece, Delay, Direction, InputHandler};
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
@@ -18,25 +16,6 @@ pub struct Model {
     settings: Settings,
     running: bool,
     delay: Delay,
-}
-
-#[derive(PartialEq, Eq, Hash)]
-pub enum Direction {
-    Left,
-    Right,
-    Down,
-}
-
-lazy_static! {
-    pub static ref DIRECTION_OFFSETS: HashMap<Direction, BoardPositionOffset> = {
-        let mut map = HashMap::new();
-
-        map.insert(Direction::Left, BoardPositionOffset::new(0, -1));
-        map.insert(Direction::Right, BoardPositionOffset::new(0, 1));
-        map.insert(Direction::Down, BoardPositionOffset::new(1, 0));
-
-        map
-    };
 }
 
 /**

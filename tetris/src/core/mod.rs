@@ -1,5 +1,6 @@
 mod active_piece;
 mod delay;
+mod direction;
 mod game_assets;
 mod game_loop;
 mod game_renderer;
@@ -10,6 +11,7 @@ mod view;
 
 pub use self::active_piece::ActivePiece;
 pub use self::delay::Delay;
+pub use self::direction::Direction;
 pub use self::game_assets::GameAssets;
 pub use self::game_loop::GameLoop;
 pub use self::game_renderer::GameRenderer;

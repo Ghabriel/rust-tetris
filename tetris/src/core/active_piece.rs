@@ -1,9 +1,23 @@
+use lazy_static::lazy_static;
+use std::collections::HashMap;
 use super::super::board::Board;
 use super::super::helpers;
 use super::super::piece::Piece;
-use super::super::position::BoardPosition;
+use super::super::position::{BoardPosition, BoardPositionOffset};
 use super::super::rotations::{RotationDirection, RotationSystem};
-use super::model::{Direction, DIRECTION_OFFSETS};
+use super::Direction;
+
+lazy_static! {
+    static ref DIRECTION_OFFSETS: HashMap<Direction, BoardPositionOffset> = {
+        let mut map = HashMap::new();
+
+        map.insert(Direction::Left, BoardPositionOffset::new(0, -1));
+        map.insert(Direction::Right, BoardPositionOffset::new(0, 1));
+        map.insert(Direction::Down, BoardPositionOffset::new(1, 0));
+
+        map
+    };
+}
 
 pub struct ActivePiece {
     pub piece: Piece,
@@ -44,33 +58,9 @@ impl ActivePiece {
 
         self.get_block_iterator(rotation_system)
             .all(|tile_position| {
-                !self.is_touching_wall(&tile_position, direction, board) &&
+                !board.is_touching_wall(&tile_position, direction) &&
                 !board.is_occupied(&(tile_position + offset))
             })
-    }
-
-    // TODO: move to Board itself
-    fn is_touching_wall(
-        &self,
-        position: &BoardPosition,
-        wall_direction: &Direction,
-        board: &dyn Board
-    ) -> bool {
-        match wall_direction {
-            Direction::Left => {
-                position.column == 0
-            },
-            Direction::Right => {
-                let num_columns = board.get_num_columns() as isize;
-
-                position.column == num_columns - 1
-            },
-            Direction::Down => {
-                let num_rows = board.get_num_rows() as isize;
-
-                position.row == num_rows - 1
-            }
-        }
     }
 
     pub fn move_towards(&mut self, direction: &Direction) {
@@ -109,15 +99,7 @@ impl ActivePiece {
     fn is_valid(&self, rotation_system: &RotationSystem, board: &dyn Board) -> bool {
         self.get_block_iterator(rotation_system)
             .all(|tile_position| {
-                self.is_inside_board(&tile_position, board) && !board.is_occupied(&tile_position)
+                board.is_in_bounds(&tile_position) && !board.is_occupied(&tile_position)
             })
-    }
-
-    // TODO: move to Board itself
-    fn is_inside_board(&self, position: &BoardPosition, board: &dyn Board) -> bool {
-        let board_num_rows = board.get_num_rows();
-        let board_num_columns = board.get_num_columns();
-
-        position.is_inside_grid(board_num_rows, board_num_columns)
     }
 }

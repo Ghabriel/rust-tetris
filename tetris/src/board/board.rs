@@ -1,3 +1,4 @@
+use super::super::core::Direction;
 use super::super::piece::Piece;
 use super::super::position::BoardPosition;
 use super::super::rotations::RotationSystem;
@@ -11,6 +12,8 @@ pub trait Board {
     fn get_num_columns(&self) -> usize;
     fn get_num_rows(&self) -> usize;
     fn is_occupied(&self, position: &BoardPosition) -> bool;
+    fn is_touching_wall(&self, position: &BoardPosition, wall_direction: &Direction) -> bool;
+    fn is_in_bounds(&self, position: &BoardPosition) -> bool;
     fn materialize(
         &mut self,
         piece: &Piece,
