@@ -1,10 +1,9 @@
 use lazy_static::lazy_static;
 use sfml::window::Key;
 use std::collections::HashMap;
-use super::super::board::{Block, MaterializationStatus, SimpleBoard};
+use super::super::board::{Block, Board, MaterializationStatus, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
-use super::super::helpers;
 use super::super::piece::{Piece, PieceColor, PieceKind};
 use super::super::position::{BoardPosition, BoardPositionOffset};
 use super::super::rotations::{RotationDirection, RotationSystem};
@@ -22,14 +21,14 @@ pub struct Model {
 }
 
 #[derive(PartialEq, Eq, Hash)]
-enum Direction {
+pub enum Direction {
     Left,
     Right,
     Down,
 }
 
 lazy_static! {
-    static ref DIRECTION_OFFSETS: HashMap<Direction, BoardPositionOffset> = {
+    pub static ref DIRECTION_OFFSETS: HashMap<Direction, BoardPositionOffset> = {
         let mut map = HashMap::new();
 
         map.insert(Direction::Left, BoardPositionOffset::new(0, -1));
@@ -45,7 +44,7 @@ lazy_static! {
  */
 impl Model {
     pub fn for_each_row(&self, callback: &mut FnMut(&Vec<&Option<Block>>)) {
-        self.board_gravity_pair.board().for_each_row(callback);
+        self.get_board().for_each_row(callback);
     }
 
     pub fn get_active_piece(&self) -> &Option<ActivePiece> {
@@ -57,11 +56,20 @@ impl Model {
     }
 
     pub fn get_board_num_rows(&self) -> usize {
-        self.board_gravity_pair.board().get_num_rows()
+        self.get_board().get_num_rows()
     }
 
     pub fn get_board_num_columns(&self) -> usize {
-        self.board_gravity_pair.board().get_num_columns()
+        self.get_board().get_num_columns()
+    }
+}
+
+/**
+ * Other getters
+ */
+impl Model {
+    fn get_board(&self) -> &dyn Board {
+        self.board_gravity_pair.board()
     }
 }
 
@@ -83,8 +91,17 @@ impl Tick for Model {
             return false;
         }
 
-        if self.can_move_active_piece(&Direction::Down) {
-            self.move_active_piece(&Direction::Down);
+        let can_move_down = self.active_piece
+            .as_mut()
+            .unwrap()
+            .can_move_towards(
+                &Direction::Down,
+                &self.settings.rotation_system,
+                self.board_gravity_pair.board()
+            );
+
+        if can_move_down {
+            self.get_active_piece_mut().move_towards(&Direction::Down);
             return false;
         }
 
@@ -176,11 +193,21 @@ impl Model {
 
         pressed_keys.iter().for_each(|key| {
             match key {
-                Key::Left => {
-                    self.try_move_active_piece(Direction::Left);
-                },
-                Key::Right => {
-                    self.try_move_active_piece(Direction::Right);
+                Key::Left | Key::Right => {
+                    let direction = match key {
+                        Key::Left => Direction::Left,
+                        Key::Right => Direction::Right,
+                        _ => unreachable!(),
+                    };
+
+                    self.active_piece
+                        .as_mut()
+                        .unwrap()
+                        .try_move_towards(
+                            direction,
+                            &self.settings.rotation_system,
+                            self.board_gravity_pair.board()
+                        );
                 },
                 Key::A => {
                     self.try_rotate_active_piece(RotationDirection::Counterclockwise);
@@ -193,55 +220,17 @@ impl Model {
         });
     }
 
-    fn try_move_active_piece(&mut self, direction: Direction) {
-        if self.can_move_active_piece(&direction) {
-            self.move_active_piece(&direction);
-        }
-    }
-
-    fn can_move_active_piece(&self, direction: &Direction) -> bool {
-        let offset = DIRECTION_OFFSETS.get(direction).unwrap();
-
-        self.get_active_piece_iterator()
-            .all(|tile_position| {
-                !self.is_touching_wall(&tile_position, direction) &&
-                !self.is_occupied(&(tile_position + offset))
-            })
+    fn get_active_piece_mut(&mut self) -> &mut ActivePiece {
+        self.active_piece.as_mut().unwrap()
     }
 
     fn get_active_piece_iterator<'a>(&'a self) -> impl Iterator<Item = BoardPosition> + 'a {
-        let ActivePiece { piece, position } = self.active_piece.as_ref().unwrap();
+        let rotation_system = self.get_rotation_system();
 
-        helpers::get_piece_iterator(piece, position, self.get_rotation_system())
-    }
-
-    fn is_touching_wall(&self, position: &BoardPosition, wall_direction: &Direction) -> bool {
-        match wall_direction {
-            Direction::Left => {
-                position.column == 0
-            },
-            Direction::Right => {
-                let num_columns = self.board_gravity_pair.board().get_num_columns() as isize;
-
-                position.column == num_columns - 1
-            },
-            Direction::Down => {
-                let num_rows = self.board_gravity_pair.board().get_num_rows() as isize;
-
-                position.row == num_rows - 1
-            }
-        }
-    }
-
-    fn is_occupied(&self, position: &BoardPosition) -> bool {
-        self.board_gravity_pair.board().is_occupied(position)
-    }
-
-    fn move_active_piece(&mut self, direction: &Direction) {
-        let current_piece = self.active_piece.as_mut().unwrap();
-        let position_offset = DIRECTION_OFFSETS.get(&direction).unwrap();
-
-        current_piece.position += position_offset;
+        self.active_piece
+            .as_ref()
+            .unwrap()
+            .get_block_iterator(rotation_system)
     }
 
     fn try_rotate_active_piece(&mut self, direction: RotationDirection) {
@@ -264,9 +253,11 @@ impl Model {
     }
 
     fn is_active_piece_valid(&self) -> bool {
+        let board = self.get_board();
+
         self.get_active_piece_iterator()
             .all(|tile_position| {
-                self.is_inside_board(&tile_position) && !self.is_occupied(&tile_position)
+                self.is_inside_board(&tile_position) && !board.is_occupied(&tile_position)
             })
     }
 
@@ -298,7 +289,7 @@ impl Model {
  */
 impl Model {
     fn clear_filled_rows(&mut self) {
-        let filled_rows = self.board_gravity_pair.board().get_filled_rows();
+        let filled_rows = self.get_board().get_filled_rows();
 
         self.board_gravity_pair.clear_rows(&filled_rows, &self.settings);
     }
