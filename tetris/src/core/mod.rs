@@ -1,3 +1,4 @@
+mod active_piece;
 mod delay;
 mod game_assets;
 mod game_loop;
@@ -7,6 +8,7 @@ mod model;
 mod traits;
 mod view;
 
+pub use self::active_piece::ActivePiece;
 pub use self::delay::Delay;
 pub use self::game_assets::GameAssets;
 pub use self::game_loop::GameLoop;

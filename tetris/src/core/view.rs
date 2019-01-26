@@ -4,8 +4,7 @@ use super::super::helpers;
 use super::super::piece::{Piece, PieceColor};
 use super::super::position::{BoardPosition, WindowPosition};
 use super::super::settings;
-use super::model::ActivePiece;
-use super::{GameAssets, Model};
+use super::{ActivePiece, GameAssets, Model};
 
 pub struct View {
     window: RenderWindow,

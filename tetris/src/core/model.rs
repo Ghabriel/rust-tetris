@@ -10,7 +10,7 @@ use super::super::position::{BoardPosition, BoardPositionOffset};
 use super::super::rotations::{RotationDirection, RotationSystem};
 use super::super::settings::Settings;
 use super::traits::Tick;
-use super::{Delay, InputHandler};
+use super::{ActivePiece, Delay, InputHandler};
 
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
@@ -19,11 +19,6 @@ pub struct Model {
     settings: Settings,
     running: bool,
     delay: Delay,
-}
-
-pub struct ActivePiece {
-    pub piece: Piece,
-    pub position: BoardPosition,
 }
 
 #[derive(PartialEq, Eq, Hash)]
@@ -84,7 +79,7 @@ impl Tick for Model {
         self.handle_input();
 
         self.delay.tick();
-        if self.delay.block_for_frames(6) {
+        if self.delay.block_for_frames(15) {
             return false;
         }
 
