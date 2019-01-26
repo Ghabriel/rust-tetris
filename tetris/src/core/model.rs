@@ -44,7 +44,7 @@ impl Model {
 }
 
 /**
- * Other getters
+ * Internal getters
  */
 impl Model {
     fn get_board(&self) -> &dyn Board {
@@ -84,7 +84,9 @@ impl Tick for Model {
             return false;
         }
 
-        match self.materialize_active_piece() {
+        let mut active_piece = self.active_piece.take().unwrap();
+
+        match active_piece.materialize_at(&self.settings.rotation_system, self.board_gravity_pair.board_mut()) {
             MaterializationStatus::Success => {},
             MaterializationStatus::Failure => {
                 self.running = false;
@@ -211,21 +213,6 @@ impl Model {
 
     fn get_active_piece_mut(&mut self) -> &mut ActivePiece {
         self.active_piece.as_mut().unwrap()
-    }
-}
-
-/**
- * materialize_active_piece implementation
- */
-impl Model {
-    fn materialize_active_piece(&mut self) -> MaterializationStatus {
-        let ActivePiece { piece, position } = self.active_piece.take().unwrap();
-
-        self.board_gravity_pair.board_mut().materialize(
-            &piece,
-            &position,
-            &self.settings.rotation_system,
-        )
     }
 }
 

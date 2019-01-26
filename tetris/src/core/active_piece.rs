@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use super::super::board::Board;
+use super::super::board::{Board, MaterializationStatus};
 use super::super::helpers;
 use super::super::piece::Piece;
 use super::super::position::{BoardPosition, BoardPositionOffset};
@@ -101,5 +101,18 @@ impl ActivePiece {
             .all(|tile_position| {
                 board.is_in_bounds(&tile_position) && !board.is_occupied(&tile_position)
             })
+    }
+}
+
+/**
+ * Materialization
+ */
+impl ActivePiece {
+    pub fn materialize_at(&mut self, rotation_system: &RotationSystem, board: &mut dyn Board) -> MaterializationStatus {
+        board.materialize(
+            &self.piece,
+            &self.position,
+            rotation_system,
+        )
     }
 }
