@@ -19,31 +19,44 @@ lazy_static! {
     };
 }
 
-pub struct ActivePiece {
-    pub piece: Piece,
-    pub position: BoardPosition,
+pub struct ActivePiece<'a> {
+    piece: Piece,
+    position: BoardPosition,
+    rotation_system: &'a RotationSystem,
 }
 
-impl ActivePiece {
-    pub fn get_block_iterator<'a>(
-        &'a self,
-        rotation_system: &'a RotationSystem
-    ) -> impl Iterator<Item = BoardPosition> + 'a {
-        helpers::get_piece_iterator(&self.piece, &self.position, rotation_system)
+impl<'a> ActivePiece<'a> {
+    pub fn new(
+        piece: Piece,
+        position: BoardPosition,
+        rotation_system: &RotationSystem,
+    ) -> ActivePiece {
+        ActivePiece { piece, position, rotation_system }
+    }
+
+    pub fn get_block_iterator<'b>(&'b self) -> impl Iterator<Item = BoardPosition> + 'b {
+        helpers::get_piece_iterator(&self.piece, &self.position, &self.rotation_system)
+    }
+
+    pub fn get_piece(&self) -> &Piece {
+        &self.piece
+    }
+
+    pub fn get_position(&self) -> &BoardPosition {
+        &self.position
     }
 }
 
 /**
  * Movement-related methods
  */
-impl ActivePiece {
+impl<'a> ActivePiece<'a> {
     pub fn try_move_towards(
         &mut self,
         direction: Direction,
-        rotation_system: &RotationSystem,
         board: &dyn Board,
     ) {
-        if self.can_move_towards(&direction, rotation_system, board) {
+        if self.can_move_towards(&direction, board) {
             self.move_towards(&direction);
         }
     }
@@ -51,12 +64,11 @@ impl ActivePiece {
     pub fn can_move_towards(
         &self,
         direction: &Direction,
-        rotation_system: &RotationSystem,
         board: &dyn Board,
     ) -> bool {
         let offset = DIRECTION_OFFSETS.get(direction).unwrap();
 
-        self.get_block_iterator(rotation_system)
+        self.get_block_iterator()
             .all(|tile_position| {
                 !board.is_touching_wall(&tile_position, direction) &&
                 !board.is_occupied(&(tile_position + offset))
@@ -73,31 +85,30 @@ impl ActivePiece {
 /**
  * Rotation-related methods
  */
-impl ActivePiece {
+impl<'a> ActivePiece<'a> {
     pub fn try_rotate(
         &mut self,
         direction: RotationDirection,
-        rotation_system: &RotationSystem,
         board: &dyn Board,
     ) {
-        self.rotate(&direction, rotation_system);
+        self.rotate(&direction);
 
-        if !self.is_valid(rotation_system, board) {
+        if !self.is_valid(board) {
             let reverse_direction = match direction {
                 RotationDirection::Clockwise => RotationDirection::Counterclockwise,
                 RotationDirection::Counterclockwise => RotationDirection::Clockwise,
             };
 
-            self.rotate(&reverse_direction, rotation_system);
+            self.rotate(&reverse_direction);
         }
     }
 
-    fn rotate(&mut self, direction: &RotationDirection, rotation_system: &RotationSystem) {
-        self.piece.rotate(direction, rotation_system);
+    fn rotate(&mut self, direction: &RotationDirection) {
+        self.piece.rotate(direction, &self.rotation_system);
     }
 
-    fn is_valid(&self, rotation_system: &RotationSystem, board: &dyn Board) -> bool {
-        self.get_block_iterator(rotation_system)
+    fn is_valid(&self, board: &dyn Board) -> bool {
+        self.get_block_iterator()
             .all(|tile_position| {
                 board.is_in_bounds(&tile_position) && !board.is_occupied(&tile_position)
             })
@@ -107,12 +118,12 @@ impl ActivePiece {
 /**
  * Materialization
  */
-impl ActivePiece {
-    pub fn materialize_at(&mut self, rotation_system: &RotationSystem, board: &mut dyn Board) -> MaterializationStatus {
+impl<'a> ActivePiece<'a> {
+    pub fn materialize_at(&mut self, board: &mut dyn Board) -> MaterializationStatus {
         board.materialize(
             &self.piece,
             &self.position,
-            rotation_system,
+            &self.rotation_system,
         )
     }
 }

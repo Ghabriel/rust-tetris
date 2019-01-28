@@ -1,4 +1,5 @@
 use sfml::window::Key;
+use std::cell::RefCell;
 use super::super::board::{Block, Board, MaterializationStatus, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
@@ -75,7 +76,6 @@ impl Tick for Model {
             .unwrap()
             .can_move_towards(
                 &Direction::Down,
-                &self.settings.rotation_system,
                 self.board_gravity_pair.board()
             );
 
@@ -86,7 +86,7 @@ impl Tick for Model {
 
         let mut active_piece = self.active_piece.take().unwrap();
 
-        match active_piece.materialize_at(&self.settings.rotation_system, self.board_gravity_pair.board_mut()) {
+        match active_piece.materialize_at(self.board_gravity_pair.board_mut()) {
             MaterializationStatus::Success => {},
             MaterializationStatus::Failure => {
                 self.running = false;
@@ -139,7 +139,10 @@ impl Model {
         let piece = random_piece();
         let position = self.get_centralized_position_for(&piece);
 
-        self.active_piece = Some(ActivePiece { piece, position });
+        // self.active_piece = Some(ActivePiece { piece, position, rotation_system: &self.settings.rotation_system });
+        self.active_piece = Some(
+            ActivePiece::new(piece, position, RefCell::new(self.settings.rotation_system))
+        );
     }
 
     fn get_centralized_position_for(&self, piece: &Piece) -> BoardPosition {
@@ -186,7 +189,6 @@ impl Model {
                         .unwrap()
                         .try_move_towards(
                             direction,
-                            &self.settings.rotation_system,
                             self.board_gravity_pair.board(),
                         );
                 },
@@ -202,7 +204,6 @@ impl Model {
                         .unwrap()
                         .try_rotate(
                             direction,
-                            &self.settings.rotation_system,
                             self.board_gravity_pair.board(),
                         );
                 },
