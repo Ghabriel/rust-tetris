@@ -1,5 +1,4 @@
 use super::super::super::board::SimpleBoard;
-use super::super::super::settings::Settings;
 
 pub struct NaiveGravity {}
 
@@ -8,7 +7,7 @@ impl NaiveGravity {
         NaiveGravity { }
     }
 
-    pub fn clear_rows(&self, board: &mut SimpleBoard, rows: &[usize], settings: &Settings) {
+    pub fn clear_rows(&self, board: &mut SimpleBoard, rows: &[usize]) {
         // TODO
     }
 }

@@ -1,5 +1,4 @@
 use sfml::window::Key;
-use std::cell::RefCell;
 use super::super::board::{Block, Board, MaterializationStatus, SimpleBoard};
 use super::super::gravity::{BoardGravityPair, Gravity};
 use super::super::gravity::naive::{NaiveGravity, NaiveGravityPair};
@@ -10,11 +9,17 @@ use super::super::settings::Settings;
 use super::traits::Tick;
 use super::{ActivePiece, Delay, Direction, InputHandler};
 
+pub struct ModelSettings {
+    pub board_size: (usize, usize),
+    pub gravity: Gravity,
+}
+
 pub struct Model {
     board_gravity_pair: Box<dyn BoardGravityPair>,
     active_piece: Option<ActivePiece>,
+    rotation_system: Option<RotationSystem>,
     input_handler: InputHandler,
-    settings: Settings,
+    settings: ModelSettings,
     running: bool,
     delay: Delay,
 }
@@ -32,7 +37,11 @@ impl Model {
     }
 
     pub fn get_rotation_system(&self) -> &RotationSystem {
-        &self.settings.rotation_system
+        if let Some(active_piece) = &self.active_piece {
+            active_piece.get_rotation_system()
+        } else {
+            &self.rotation_system.as_ref().unwrap()
+        }
     }
 
     pub fn get_board_num_rows(&self) -> usize {
@@ -102,11 +111,17 @@ impl Tick for Model {
 
 impl Model {
     pub fn new(settings: Settings) -> Model {
+        let model_settings = ModelSettings {
+            board_size: settings.board_size,
+            gravity: settings.gravity,
+        };
+
         Model {
-            board_gravity_pair: get_boxed_gravity(&settings.gravity, &settings.board_size),
+            board_gravity_pair: get_boxed_gravity(&model_settings.gravity, &model_settings.board_size),
             active_piece: None,
+            rotation_system: Some(settings.rotation_system),
             input_handler: InputHandler::new(),
-            settings: settings,
+            settings: model_settings,
             running: true, // TODO: change to false later
             delay: Delay::new(),
         }
@@ -141,7 +156,7 @@ impl Model {
 
         // self.active_piece = Some(ActivePiece { piece, position, rotation_system: &self.settings.rotation_system });
         self.active_piece = Some(
-            ActivePiece::new(piece, position, RefCell::new(self.settings.rotation_system))
+            ActivePiece::new(piece, position, self.rotation_system.take().unwrap())
         );
     }
 
@@ -224,7 +239,7 @@ impl Model {
     fn clear_filled_rows(&mut self) {
         let filled_rows = self.get_board().get_filled_rows();
 
-        self.board_gravity_pair.clear_rows(&filled_rows, &self.settings);
+        self.board_gravity_pair.clear_rows(&filled_rows);
     }
 }
 

@@ -19,17 +19,17 @@ lazy_static! {
     };
 }
 
-pub struct ActivePiece<'a> {
+pub struct ActivePiece {
     piece: Piece,
     position: BoardPosition,
-    rotation_system: &'a RotationSystem,
+    rotation_system: RotationSystem,
 }
 
-impl<'a> ActivePiece<'a> {
+impl ActivePiece {
     pub fn new(
         piece: Piece,
         position: BoardPosition,
-        rotation_system: &RotationSystem,
+        rotation_system: RotationSystem,
     ) -> ActivePiece {
         ActivePiece { piece, position, rotation_system }
     }
@@ -45,12 +45,16 @@ impl<'a> ActivePiece<'a> {
     pub fn get_position(&self) -> &BoardPosition {
         &self.position
     }
+
+    pub fn get_rotation_system(&self) -> &RotationSystem {
+        &self.rotation_system
+    }
 }
 
 /**
  * Movement-related methods
  */
-impl<'a> ActivePiece<'a> {
+impl ActivePiece {
     pub fn try_move_towards(
         &mut self,
         direction: Direction,
@@ -85,7 +89,7 @@ impl<'a> ActivePiece<'a> {
 /**
  * Rotation-related methods
  */
-impl<'a> ActivePiece<'a> {
+impl ActivePiece {
     pub fn try_rotate(
         &mut self,
         direction: RotationDirection,
@@ -118,7 +122,7 @@ impl<'a> ActivePiece<'a> {
 /**
  * Materialization
  */
-impl<'a> ActivePiece<'a> {
+impl ActivePiece {
     pub fn materialize_at(&mut self, board: &mut dyn Board) -> MaterializationStatus {
         board.materialize(
             &self.piece,

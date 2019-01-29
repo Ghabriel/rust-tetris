@@ -1,5 +1,4 @@
 use super::super::super::board::{Board, SimpleBoard};
-use super::super::super::settings::Settings;
 use super::super::BoardGravityPair;
 use super::NaiveGravity;
 
@@ -26,7 +25,7 @@ impl BoardGravityPair for NaiveGravityPair {
         &mut self.board
     }
 
-    fn clear_rows(&mut self, rows: &[usize], settings: &Settings) {
-        self.gravity.clear_rows(&mut self.board, rows, settings);
+    fn clear_rows(&mut self, rows: &[usize]) {
+        self.gravity.clear_rows(&mut self.board, rows);
     }
 }
