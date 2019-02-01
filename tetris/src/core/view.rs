@@ -1,10 +1,9 @@
 use sfml::graphics::{Color, IntRect, RenderTarget, RenderWindow, Sprite, Transformable};
 use sfml::window::{Event, Style};
-use super::super::helpers;
-use super::super::piece::{Piece, PieceColor};
+use super::super::piece::PieceColor;
 use super::super::position::{BoardPosition, WindowPosition};
 use super::super::settings;
-use super::{GameAssets, Model};
+use super::{ActivePiece, GameAssets, Model};
 
 pub struct View {
     window: RenderWindow,
@@ -84,25 +83,20 @@ impl View {
 
     pub fn render_active_piece(&mut self, model: &Model, assets: &mut GameAssets) {
         if let Some(active_piece) = model.get_active_piece() {
-            let piece = active_piece.get_piece();
-            let position = active_piece.get_position();
-
-            self.render_piece(model, piece, position, assets);
+            self.render_piece(active_piece, assets);
         }
     }
 
     pub fn render_piece(
         &mut self,
-        model: &Model,
-        piece: &Piece,
-        piece_position: &BoardPosition,
+        piece: &ActivePiece,
         assets: &mut GameAssets,
     ) {
         let mut block_sprite = make_block_sprite(assets);
 
         set_block_color(&mut block_sprite, piece.get_color());
 
-        helpers::get_piece_iterator(piece, piece_position, model.get_rotation_system())
+        piece.get_block_iterator()
             .for_each(|block_position| {
                 self.draw_block(&block_position, &mut block_sprite);
             });

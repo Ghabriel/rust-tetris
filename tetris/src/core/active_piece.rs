@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 use super::super::board::{Board, MaterializationStatus};
 use super::super::helpers;
-use super::super::piece::Piece;
+use super::super::piece::{Piece, PieceColor};
 use super::super::position::{BoardPosition, BoardPositionOffset};
 use super::super::rotations::{RotationDirection, RotationSystem};
 use super::Direction;
@@ -38,12 +38,8 @@ impl ActivePiece {
         helpers::get_piece_iterator(&self.piece, &self.position, &self.rotation_system)
     }
 
-    pub fn get_piece(&self) -> &Piece {
-        &self.piece
-    }
-
-    pub fn get_position(&self) -> &BoardPosition {
-        &self.position
+    pub fn get_color(&self) -> &PieceColor {
+        &self.piece.get_color()
     }
 
     pub fn get_rotation_system(&self) -> &RotationSystem {
