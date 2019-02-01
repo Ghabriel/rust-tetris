@@ -45,6 +45,10 @@ impl ActivePiece {
     pub fn get_rotation_system(&self) -> &RotationSystem {
         &self.rotation_system
     }
+
+    pub fn transfer_rotation_system(self, into: &mut Option<RotationSystem>) {
+        into.replace(self.rotation_system);
+    }
 }
 
 /**

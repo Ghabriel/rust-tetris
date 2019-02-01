@@ -103,6 +103,8 @@ impl Tick for Model {
             }
         }
 
+        active_piece.transfer_rotation_system(&mut self.rotation_system);
+
         self.clear_filled_rows();
 
         false
